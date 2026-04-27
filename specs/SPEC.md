@@ -45,7 +45,17 @@ Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kit
 
 - **Version adapters** with the tool (e.g. `hyprland_v1`) so old schemes keep working when mapping tables change.
 - **Add targets incrementally** — shipping a new adapter enables that target for **all** scheme packs without editing each pack.
-- **Optional `target_overrides`** in `scheme.json` — per-target JSON objects merged **on top of** adapter output when a particular palette needs an exception (rare); shape is defined per adapter over time.
+- **Optional `target_overrides`** in `scheme.json` — per-target JSON objects merged **on top of** adapter output when a particular palette needs an exception (rare); shape is adapter-defined. **Merge semantics** are fixed (see below).
+
+### `target_overrides` merge semantics (v1)
+
+**Merge order:** for each target id `T` (e.g. `hyprland`), start from the adapter’s **default output object** (from `tokens`, `fonts`, `assets`), then merge **`target_overrides[T]`** on top. **Override wins** when both sides define the same key.
+
+**Objects:** if both values are JSON **objects**, merge **recursively** with the same rule at each level.
+
+**Arrays, strings, numbers, booleans, null:** if the **override** value for a key is **not** a JSON object, it **replaces** the adapter’s value for that key in full. In particular, **arrays are replaced whole**—no element-by-element merge in v1 unless a **specific adapter** documents otherwise.
+
+**Unknown keys:** keys that appear only in `target_overrides` are merged in like any others. There is **no** global step that rejects unknown override keys. **Each adapter** decides at **emit time** whether to forward them, strip them, or **fail** (e.g. if the target format is strict). Adapters should document behavior; prefer **explicit errors** over silent data loss for strict downstreams.
 
 Default Base16 → Qt/Kvantum-style roles remains documented in the **Colors** table above; each adapter’s concrete key list will be spelled out in adapter-specific docs or tests as we implement.
 

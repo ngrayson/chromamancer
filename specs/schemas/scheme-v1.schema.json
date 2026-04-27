@@ -84,7 +84,7 @@
     },
     "target_overrides": {
       "type": "object",
-      "description": "Optional per-target blobs merged over chromamancer’s built-in adapter output. Keys are target ids (e.g. hyprland, kitty). Shapes are adapter-defined; omit when defaults from Base16/fonts/assets suffice.",
+      "description": "Optional per-target objects deep-merged over adapter defaults (see SPEC.md, target_overrides merge). Keys = target ids. Unknown keys: per-adapter handling at emit time.",
       "additionalProperties": true
     }
   },
