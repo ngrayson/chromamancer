@@ -1,5 +1,5 @@
 {
-  description = "Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kitty, GTK, Qt, Quickshell, Albert, Hyprland)";
+  description = "chromamancer — dev shell for hacking; standalone CLI is the bootstrap delivery (no HM/NixOS module yet)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

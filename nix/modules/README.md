@@ -1,8 +1,10 @@
-# Nix modules (stubs)
+# Nix modules (deferred)
 
-Place **Home Manager** and **NixOS** module entrypoints here when you wire declarative theming.
+**Bootstrap phase:** chromamancer is meant to run as a **standalone CLI**, not as a flake-integrated Home Manager / NixOS module from this repository.
 
-- `home-manager.nix` — user session: Kitty, Hyprland, Quickshell, Albert, GTK/Qt theming via HM options.
-- `nixos.nix` — optional system-level configuration if any targets require it.
+When we add first-party integration later, this directory would hold:
 
-The flake in the parent directory includes commented placeholders for exporting these as `homeManagerModules` / `nixosModules`.
+- `home-manager.nix` — user-session wiring (generated fragments, optional options).
+- `nixos.nix` — optional system-level hooks.
+
+The parent `flake.nix` keeps commented placeholders for future `homeManagerModules` / `nixosModules` exports. Until then, **`devShells` only**.

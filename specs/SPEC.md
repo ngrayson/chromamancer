@@ -7,7 +7,8 @@ Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kit
 1. **Contracts live in** `specs/schemas/`. Version them (`scheme-v1`, later `scheme-v2`) before adding generators or Nix glue.
 2. **Schemes are data** under `schemes/<name>/`. They must validate against the active schema (tooling TBD).
 3. **`scheme.json` is portable look data** — Base16 `tokens`, `fonts`, `assets`. **Default mapping** from our names to each app’s config (and transforms like derived borders) lives in **target adapters** inside chromamancer; you add targets one adapter at a time.
-4. **Iteration vs system of record:** see **Apply model** below — CLI for fast targets during dev; **NixOS / Home Manager rebuild is authoritative** and replaces all generated outputs.
+4. **Iteration vs system of record:** see **Apply model** below — CLI for fast targets during dev; when you adopt Nix for the same paths, **NixOS / Home Manager activation** replaces generated outputs.
+5. **Bootstrap delivery (current phase):** chromamancer ships as a **standalone CLI**—a normal program you run (`chromamancer …`). It is **not** gated on **flakes** or **Home Manager**: there is no required first-party `homeManagerModules` / `nixosModules` output in this phase. Optional **devShell** in `nix/flake.nix` is only for building/hacking. **Later phase:** first-party Nix modules or flake installables if we choose to add them.
 
 ## Colors (v1): Base16 canonical names
 
@@ -50,14 +51,18 @@ Default Base16 → Qt/Kvantum-style roles remains documented in the **Colors** t
 
 ## Apply model: fast iteration vs Nix
 
+**Standalone bootstrap:** if you **only** run the chromamancer CLI, it is the **sole** writer to the paths you configure—nothing automatically overwrites its output until **you** introduce another mechanism (Nix, another tool, etc.).
+
+**When you use Nix for the same paths:** the rules below apply.
+
 **Two classes of target (per adapter):**
 
 1. **Fast-iterative** — chromamancer **CLI** can regenerate outputs under the live config tree and, where the app supports it, **reload** so you can tune a look quickly. Typical for file-based configs that accept included fragments (e.g. Hyprland, Kitty); exact list is per-adapter documentation.
 2. **Rebuild-only** — outputs are only sensible to apply as part of **NixOS / Home Manager** activation (no hot reload, or generation is tied to store paths / system state). Iteration loop is **edit scheme → rebuild**, not `chromamancer apply`.
 
-**Authoritative state:** running **`nixos-rebuild`** / **`home-manager switch`** (or equivalent) **regenerates and installs chromamancer artifacts for every target**, including fast-iterative ones. That **overwrites** any files the CLI had written for those targets. Treat **CLI apply as dev-time only**; anything you want to keep must live in **Nix-expressed** scheme inputs and module config **before** you rely on a reboot-stable system.
+**Authoritative Nix (when you opt in):** if **`nixos-rebuild`** / **`home-manager switch`** (or equivalent) **installs** the same generated paths chromamancer uses, that activation **regenerates** those files (via **your** `runCommand`, **future** first-party module, etc.) and **overwrites** anything the CLI wrote there. Treat overlapping **CLI apply** as **dev-time** in that case; persistent state belongs in **your** Nix-expressed scheme inputs and derivations.
 
-**Implication:** after a successful rebuild, on-disk theme files should match the **Nix closure**, not stale iterative tweaks unless your Nix config references the same dev paths (discouraged for production).
+**Implication:** after a rebuild that manages those paths, on-disk theme files should match **what Nix installed**, not stale CLI tweaks—unless paths are intentionally disjoint (CLI → dev copy, Nix → production copy).
 
 ## Supported targets (adapter roadmap)
 
