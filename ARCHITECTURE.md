@@ -49,9 +49,10 @@ specs/schemas  ──validate──►  schemes/*     ──read──►  CLI a
 - **Workspace layout** — generic path `crates/cli` keeps the Stellarium template independent of project name; the binary name remains `chromamancer`.
 - **Spec before codegen** — Nix and Rust generators should target **versioned** schema files to avoid drift.
 - **v1 palette** — canonical keys are **Base16** (`base00`–`base0F`) with **`#RRGGBBAA`**, plus required **global fonts** (`fonts.ui`, `fonts.mono`).
+- **v1 scheme file** — `schemes/<id>/scheme.json` is **JSONC** on disk (comments allowed); validation runs on the parsed JSON value. Nix `fromJSON` needs strict JSON—use a build-time export or parser (see `specs/SPEC.md`).
 
 ## Future considerations
 
 - Watch mode / IPC for Quickshell and Hyprland reload.
-- Optional TOML scheme format alongside JSON if ergonomics demand it (single schema mapping).
+- Optional TOML or other formats if we add a single canonical parser step and stable JSON projection.
 - CI: `cargo test`, schema validation for `schemes/*`, and Nix flake checks.

@@ -49,6 +49,13 @@ The scheme carries **which typefaces** belong to the look, not **how big** they 
 
 Each `family` is a **Linux-usable font family string** (usually a Fontconfig family name).
 
+## Scheme pack file (v1)
+
+- **Path:** `schemes/<scheme-id>/scheme.json` at the pack root (fixed filename; no nested-only layout in v1).
+- **Syntax:** **JSONC** — JSON plus line (`//`) and block (`/* … */`) comments. Plain **JSON** (no comments) is always valid.
+- **Semantics:** After parsing comments away, the document must validate against `specs/schemas/scheme-v1.schema.json` (structure is still “JSON” for schema tooling).
+- **Nix note:** `builtins.fromJSON` / `readFile`+`fromJSON` only accept strict JSON. Nix-side pipelines should either consume a **generated JSON** artifact (e.g. `chromamancer dump-json`, a flake `runCommand` with a JSONC parser) or keep a machine-produced `scheme.json` without comments for import.
+
 ## Targets (initial wish list)
 
 | Target        | Notes |
@@ -70,6 +77,6 @@ Do **not** store secrets in scheme files. Treat schemes as **public** configurat
 
 ## See also
 
-- `specs/schemas/scheme-v1.schema.json` — v1 JSON Schema (Base16 + `#RRGGBBAA` + fonts).
+- `specs/schemas/scheme-v1.schema.json` — v1 JSON Schema (Base16 + `#RRGGBBAA` + fonts); instance documents are **JSONC** on disk (`scheme.json`).
 - `schemes/README.md` — layout for scheme packs.
 - `ARCHITECTURE.md` — repository layout and data flow.
