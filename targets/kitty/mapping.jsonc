@@ -1,0 +1,33 @@
+{
+  // Kitty: canonical → kitty.conf color directives
+  "metadata": {
+    "schema_version": "1",
+    "target_id": "kitty",
+    "comment": "Native value = Kitty config key (see sw.kovidgoyal.net kitty color scheme)"
+  },
+  "canonical_to_native": {
+    "terminal.background": "background",
+    "terminal.foreground": "foreground",
+    "terminal.selection_background": "selection_background",
+    "terminal.selection_foreground": "selection_foreground",
+    "terminal.cursor": "cursor",
+    "terminal.cursor_text": "cursor_text_color",
+    "terminal.url": "url_color",
+    "terminal.color0": "color0",
+    "terminal.color1": "color1",
+    "terminal.color2": "color2",
+    "terminal.color3": "color3",
+    "terminal.color4": "color4",
+    "terminal.color5": "color5",
+    "terminal.color6": "color6",
+    "terminal.color7": "color7",
+    "terminal.color8": "color8",
+    "terminal.color9": "color9",
+    "terminal.color10": "color10",
+    "terminal.color11": "color11",
+    "terminal.color12": "color12",
+    "terminal.color13": "color13",
+    "terminal.color14": "color14",
+    "terminal.color15": "color15"
+  }
+}

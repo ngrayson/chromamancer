@@ -1,0 +1,30 @@
+{
+  // Kvantum: canonical → GeneralColors kvconfig keys (group GeneralColors only in v1)
+  "metadata": {
+    "schema_version": "1",
+    "target_id": "kvantum",
+    "comment": "Native value = key inside [GeneralColors], e.g. window.color"
+  },
+  "canonical_to_native": {
+    "qt.kvantum.window": "window.color",
+    "qt.kvantum.base": "base.color",
+    "qt.kvantum.alt_base": "alt.base.color",
+    "qt.kvantum.button": "button.color",
+    "qt.kvantum.light": "light.color",
+    "qt.kvantum.mid_light": "mid.light.color",
+    "qt.kvantum.dark": "dark.color",
+    "qt.kvantum.mid": "mid.color",
+    "qt.kvantum.highlight": "highlight.color",
+    "qt.kvantum.inactive_highlight": "inactive.highlight.color",
+    "qt.kvantum.text": "text.color",
+    "qt.kvantum.window_text": "window.text.color",
+    "qt.kvantum.button_text": "button.text.color",
+    "qt.kvantum.inactive_text": "inactive.text.color",
+    "qt.kvantum.disabled_text": "disabled.text.color",
+    "qt.kvantum.tooltip_base": "tooltip.base.color",
+    "qt.kvantum.tooltip_text": "tooltip.text.color",
+    "qt.kvantum.highlight_text": "highlight.text.color",
+    "qt.kvantum.link": "link.color",
+    "qt.kvantum.link_visited": "link.visited.color"
+  }
+}

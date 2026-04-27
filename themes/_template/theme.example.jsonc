@@ -1,92 +1,51 @@
 {
-  // Example theme — copy to `themes/<id>/theme.jsonc` and set `metadata.name` to `<id>`.
-  // Validate with theme-v1.schema.json after stripping JSONC comments (or use a JSONC-aware validator).
+  // Theme v2 — copy to themes/<id>/theme.jsonc; set metadata.name = <id>.
+  // Validate with specs/schemas/theme-v2.schema.json (JSONC-aware).
   //
-  // Mappings: values are usually token names ("base05") pointing at `tokens`; adapters resolve to #RRGGBBAA
-  // (emitters may drop alpha for formats like Kitty #RRGGBB). Literal "#RRGGBBAA" overrides are allowed.
+  // tokens: arbitrary color names → #RRGGBBAA only.
+  // canonical_assign: maps stable keys (specs/canonical-colors.md) → token name or literal / "transparent".
+  // Per-target projection: targets/<kitty|kvantum|albert>/mapping.jsonc (+ CHROMAMANCER_TARGETS_DIR).
   //
-  // Kitty `color0`–`color15`: default here follows base16-shell ANSI mapping (see SPEC.md — Mapping shapes).
-  // Kvantum: `GeneralColors` mirrors `[GeneralColors]` in `.kvconfig`; full themes still need .svg + rest of .kvconfig.
+  // v1 (Base16-only + in-file targets): theme.v1.example.jsonc (legacy).
   "metadata": {
-    "schema_version": "1",
+    "schema_version": "2",
     "name": "replace-with-pack-directory-name",
     "version": "0.1.0"
   },
   "tokens": {
-    "base00": "#181825FF",
-    "base01": "#1e1e2eFF",
-    "base02": "#313244FF",
-    "base03": "#45475aFF",
-    "base04": "#585b70FF",
-    "base05": "#cdd6f4FF",
-    "base06": "#bac2deFF",
-    "base07": "#a6adc8FF",
-    "base08": "#f38ba8FF",
-    "base09": "#fab387FF",
-    "base0A": "#f9e2afFF",
-    "base0B": "#a6e3a1FF",
-    "base0C": "#94e2d5FF",
-    "base0D": "#89b4faFF",
-    "base0E": "#cba6f7FF",
-    "base0F": "#f5c2e7FF"
+    "void": "#010212FF",
+    "mist": "#1e1e2eFF",
+    "foam": "#cdd6f4FF",
+    "accent": "#89b4faFF"
+  },
+  "canonical_assign": {
+    "terminal.background": "void",
+    "terminal.foreground": "foam",
+    "terminal.cursor": "accent",
+    "terminal.cursor_text": "void",
+    "terminal.color0": "void",
+    "terminal.color1": "void",
+    "terminal.color2": "void",
+    "terminal.color3": "void",
+    "terminal.color4": "accent",
+    "terminal.color5": "void",
+    "terminal.color6": "foam",
+    "terminal.color7": "foam",
+    "terminal.color8": "mist",
+    "terminal.color9": "void",
+    "terminal.color10": "void",
+    "terminal.color11": "void",
+    "terminal.color12": "accent",
+    "terminal.color13": "void",
+    "terminal.color14": "foam",
+    "terminal.color15": "foam",
+    "qt.kvantum.window": "void",
+    "qt.kvantum.base": "mist",
+    "qt.kvantum.text": "foam",
+    "qt.kvantum.highlight": "accent"
   },
   "fonts": {
     "ui": { "family": "Inter" },
     "mono": { "family": "JetBrainsMono Nerd Font" }
-  },
-  "targets": {
-    "kitty": {
-      "mappings": {
-        "background": "base00",
-        "foreground": "base05",
-        "selection_background": "base02",
-        "selection_foreground": "base05",
-        "cursor": "base0C",
-        "cursor_text_color": "base00",
-        "url_color": "base0C",
-        "color0": "base00",
-        "color1": "base08",
-        "color2": "base0B",
-        "color3": "base0A",
-        "color4": "base0D",
-        "color5": "base0E",
-        "color6": "base0C",
-        "color7": "base05",
-        "color8": "base03",
-        "color9": "base08",
-        "color10": "base0B",
-        "color11": "base0A",
-        "color12": "base0D",
-        "color13": "base0E",
-        "color14": "base0C",
-        "color15": "base07"
-      }
-    },
-    "kvantum": {
-      "mappings": {
-        "GeneralColors": {
-          "window.color": "base00",
-          "base.color": "base01",
-          "alt.base.color": "base02",
-          "button.color": "base02",
-          "light.color": "base01",
-          "mid.light.color": "base01",
-          "dark.color": "base03",
-          "mid.color": "base02",
-          "highlight.color": "base0D",
-          "inactive.highlight.color": "base03",
-          "text.color": "base05",
-          "window.text.color": "base05",
-          "button.text.color": "base05",
-          "inactive.text.color": "base04",
-          "disabled.text.color": "base03",
-          "tooltip.base.color": "base01",
-          "tooltip.text.color": "base05",
-          "highlight.text.color": "base07",
-          "link.color": "base0D",
-          "link.visited.color": "base0E"
-        }
-      }
-    }
   }
 }

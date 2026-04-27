@@ -1,0 +1,41 @@
+{
+  // Albert Widgets Box Model INI: canonical → INI key (section from canonical: albert.palette.* → [palette])
+  "metadata": {
+    "schema_version": "1",
+    "target_id": "albert",
+    "comment": "Native value = bare key within [palette] or [window]; adapter maps from canonical prefix."
+  },
+  "canonical_to_native": {
+    "albert.palette.base": "base",
+    "albert.palette.text": "text",
+    "albert.palette.window": "window",
+    "albert.palette.window_text": "window_text",
+    "albert.palette.button": "button",
+    "albert.palette.button_text": "button_text",
+    "albert.palette.highlight": "highlight",
+    "albert.palette.highlight_text": "highlight_text",
+    "albert.palette.placeholder_text": "placeholder_text",
+    "albert.palette.link": "link",
+    "albert.palette.link_visited": "link_visited",
+    "albert.window.input_background_brush": "input_background_brush",
+    "albert.window.input_border_brush": "input_border_brush",
+    "albert.window.input_trigger_color": "input_trigger_color",
+    "albert.window.input_hint_color": "input_hint_color",
+    "albert.window.settings_button_color": "settings_button_color",
+    "albert.window.settings_button_highlight_color": "settings_button_highlight_color",
+    "albert.window.result_item_selection_background_brush": "result_item_selection_background_brush",
+    "albert.window.result_item_selection_border_brush": "result_item_selection_border_brush",
+    "albert.window.result_item_selection_text_color": "result_item_selection_text_color",
+    "albert.window.result_item_selection_subtext_color": "result_item_selection_subtext_color",
+    "albert.window.result_item_text_color": "result_item_text_color",
+    "albert.window.result_item_subtext_color": "result_item_subtext_color",
+    "albert.window.action_item_selection_background_brush": "action_item_selection_background_brush",
+    "albert.window.action_item_selection_border_brush": "action_item_selection_border_brush",
+    "albert.window.action_item_selection_text_color": "action_item_selection_text_color",
+    "albert.window.action_item_text_color": "action_item_text_color"
+  },
+  "apply_nix": {
+    "themes_dir": ".local/share/albert/widgetsboxmodel/themes",
+    "theme_file_template": "{theme_id}.ini"
+  }
+}

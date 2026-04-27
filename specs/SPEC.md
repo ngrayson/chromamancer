@@ -4,18 +4,75 @@ Spec-driven desktop theming: live apply, Nix/HM, theme packs, multi-target (Kitt
 
 ## How we work (spec-driven)
 
-1. **Contracts live in** `specs/schemas/` (v1: **`theme-v1.schema.json`**) and [`specs/logic-registry.md`](logic-registry.md). Bump **`metadata.schema_version`** and/or the schema file when breaking theme shape.
-2. **Theme packs** live under **`themes/<theme-id>/`**. Each pack has **`theme.jsonc`** (JSONC) validated after parse against **`theme-v1.schema.json`**.
-3. **One theme file** holds **palette + typography + assets** and optional **`targets`**: per-target **`mappings`**, optional **`apply_quick`** / **`apply_nix`**, optional **`logic`**, optional **`overrides`**.
-4. **Builtin adapters** (Rust) supply **defaults**, **mode routing** (`apply-quick` vs `apply-nix`), **`logic`** hooks, and **merge** rules documented below.
-5. **Apply model:** **`apply-quick`** vs Nix **`switch`**; see **CLI** and **Authoritative paths** below.
-6. **Bootstrap:** standalone CLI; no required in-repo flake/HM module (`nix/modules/README.md`).
+1. **Contracts live in** `specs/schemas/` — **theme:** [`theme-v1.schema.json`](schemas/theme-v1.schema.json) (legacy) or [`theme-v2.schema.json`](schemas/theme-v2.schema.json); **targets:** [`target-mapping-v1.schema.json`](schemas/target-mapping-v1.schema.json); plus [`specs/canonical-colors.md`](canonical-colors.md) and [`specs/logic-registry.md`](logic-registry.md).
+2. **Theme packs** — `themes/<theme-id>/theme.jsonc` (JSONC). **v1:** fixed Base16 `tokens` + optional embedded `targets`. **v2:** arbitrary `tokens`, **`canonical_assign`** → stable semantic keys; **no** embedded `targets`.
+3. **Target mappings** — `targets/<target-id>/mapping.jsonc`: **canonical → native** projection + optional `apply_*` defaults. Discovered via **`CHROMAMANCER_TARGETS_DIR`** (see [`targets/README.md`](../targets/README.md)).
+4. **Builtin adapters** supply merge rules, **`apply-quick`** / **`apply-nix`** routing, and **`logic`** hooks (where used).
+5. **Apply model:** **`apply-quick`** vs Nix **`switch`**; see **Authoritative paths** below.
+6. **Bootstrap:** standalone CLI; no required in-repo HM module (`nix/modules/README.md`).
 
-## Colors (v1): Base16
+## Theme format v2 (canonical)
 
-**Encoding:** every `tokens.*` is **`#RRGGBBAA`**.
+**Validate:** [`theme-v2.schema.json`](schemas/theme-v2.schema.json).
 
-**Keys:** `base00`–`base0F`, required. Semantics: [Base16 styling guide](https://github.com/chriskempson/base16/blob/main/styling.md); Qt/Kvantum hints in the table (unchanged from prior revisions).
+| Part | Purpose |
+|------|--------|
+| **`metadata.schema_version`** | **`"2"`** |
+| **`tokens`** | Named swatches only; values **`#RRGGBBAA`**; names match `^[a-z][a-z0-9_-]*$`. |
+| **`canonical_assign`** | Maps **canonical keys** (enum in schema; catalog in [`canonical-colors.md`](canonical-colors.md)) → **token name**, **`#RRGGBB`/`#RRGGBBAA` literal**, or **`transparent`** (Albert borders). |
+| **`fonts`**, **`assets`** | Unchanged from v1 semantics. |
+
+**Pipeline:** resolve **`canonical_assign`** using **`tokens`** → **canonical color table** (hex / transparent). For each target, load **`targets/<id>/mapping.jsonc`**, merge with adapter builtins, emit native configs.
+
+**Themes do not embed** `targets.*`; projection and install defaults live under **`targets/`**.
+
+### Theme format v1 (legacy, Base16)
+
+**Validate:** [`theme-v1.schema.json`](schemas/theme-v1.schema.json). **`metadata.schema_version`** **`"1"`**. Fixed **`base00`–`base0F`** tokens; optional **`targets.<id>`** with `mappings`, `apply_quick`, `apply_nix`, `overrides`, `logic`. New work should use **v2 + `targets/`**; v1 remains until packs are migrated.
+
+### Discovery and CLI inputs
+
+| Mechanism | Use |
+|-----------|-----|
+| **`--theme <path>`** | Path to **`theme.jsonc`**. **Pack root** (for **`assets`**) = **directory containing the file**. |
+| **`--pack <id>`** | **`themes/<id>/theme.jsonc`** relative to **cwd** or **`CHROMAMANCER_THEMES_DIR`**. |
+| **`CHROMAMANCER_TARGETS_DIR`** | Root containing **`targets/<id>/mapping.jsonc`**; default = repo root (see [`targets/README.md`](../targets/README.md)). |
+
+Implementations SHOULD error if paths resolve outside intended roots after canonicalization (no `..` escape).
+
+### Registered target ids
+
+**Theme v1** `propertyNames` / **target-mapping** `metadata.target_id`: `hyprland`, `kitty`, `gtk`, `qt`, `kvantum`, `quickshell`, `albert`.
+
+Adding a target requires: adapter code, SPEC roadmap row, **schema enum** updates (`target-mapping-v1`, **`theme-v2` canonical enum** if new semantic keys), [`canonical-colors.md`](canonical-colors.md), [`logic-registry.md`](logic-registry.md), and **`targets/<id>/mapping.jsonc`**.
+
+### Per-target object (theme v1 only)
+
+| Key | Purpose |
+|-----|---------|
+| **`mappings`** | Declarative map; adapter shape. |
+| **`apply_quick`** | **`apply-quick`** only. |
+| **`apply_nix`** | **`apply-nix`** only. |
+| **`logic`** | Hook id; see **`logic-registry.md`**. |
+| **`overrides`** | Deep-merged on final render. |
+
+**Mode skip rule:** If an adapter does not support a mode and the theme provides no enabling block, CLI SHOULD skip with clear stderr (implementation choice: warn and continue for multi-target).
+
+### Mappings vs builtin defaults (theme v1 merge)
+
+For each target `T`, adapters maintain **`M_builtin`**.
+
+1. Absent **`mappings`** → **`M_builtin`** only.
+2. Present → **deep-merge** `mappings` onto **`M_builtin`** (objects recurse; scalars/arrays replace).
+3. **`logic`** if set.
+4. Render to native representation.
+5. Deep-merge **`overrides`**.
+
+Theme **v2** uses target **`mapping.jsonc`** + adapter code for projection instead of per-theme `mappings`.
+
+## Colors v1 appendix: Base16 token keys
+
+Legacy **v1** requires **`base00`–`base0F`** with **`#RRGGBBAA`**. Semantics: [Base16 styling guide](https://github.com/chriskempson/base16/blob/main/styling.md).
 
 | Key | Base16 role (short) | Typical Qt / Kvantum / UI use |
 |-----|---------------------|-------------------------------|
@@ -36,100 +93,57 @@ Spec-driven desktop theming: live apply, Nix/HM, theme packs, multi-target (Kitt
 | `base0E` | magenta | secondary accent, keyword emphasis |
 | `base0F` | brown / deprecated | rare accents, legacy chrome |
 
-## Metadata (v1)
+**v2:** authors may still *name* tokens `base00`… for compatibility, but the schema does not require them; semantic meaning comes from **`canonical_assign`**.
 
-- **`metadata.schema_version`:** required **`"1"`** for this schema; future majors change this and the schema filename.
-- **`metadata.name`:** required **kebab-case** string. If the pack path is **`themes/<id>/theme.jsonc`**, then **`metadata.name` MUST equal `<id>`** so discovery, CI, and docs agree. For a loose `theme.jsonc` loaded only via **`--theme`**, name is still required and should match your chosen id if you mirror into `themes/` later.
+### Kitty `color0`–`color15` (reference)
 
-## Theme document (`theme.jsonc`)
+Default **base16-shell-style** ANSI mapping for tools that fill terminal slots from Base16 is documented in the v1 template history; **v2** assigns **`terminal.color0`–`terminal.color15`** explicitly in **`canonical_assign`**.
 
-**Required:** `metadata`, `tokens`, `fonts`. **Optional:** `assets`, `targets`.
+## Metadata
 
-### Discovery and CLI inputs
-
-| Mechanism | Use |
-|-----------|-----|
-| **`--theme <path>`** | Path to any **`theme.jsonc`**. **Pack root** for resolving relative **`assets`** = **directory containing that file**. |
-| **`--pack <id>`** (or equivalent) | Resolve **`themes/<id>/theme.jsonc`** relative to **current working directory**, or relative to **`CHROMAMANCER_THEMES_DIR`** if set. Exact flag names TBD in implementation; behavior is normative. |
-
-Implementations SHOULD error if **`--pack`** resolves outside the intended themes root after canonicalization (no `..` escape).
-
-### Registered `targets` keys
-
-Only these property names are valid under **`targets`** (see [`theme-v1.schema.json`](schemas/theme-v1.schema.json) `propertyNames` and [`logic-registry.md`](logic-registry.md)):
-
-`hyprland`, `kitty`, `gtk`, `qt`, `kvantum`, `quickshell`, `albert`
-
-Unknown keys **fail JSON Schema validation**. Adding a target = code + SPEC + **schema enum** + logic-registry.
-
-### Per-target object (`targets.<id>`)
-
-| Key | Purpose |
-|-----|---------|
-| **`mappings`** | Declarative map; must match **adapter’s documented intermediate shape**. |
-| **`apply_quick`** | Used only for **`apply-quick`**. |
-| **`apply_nix`** | Used only for **`apply-nix`**. |
-| **`logic`** | Builtin hook id; see **`logic-registry.md`**. Unknown id → **fail fast**. |
-| **`overrides`** | Deep-merged onto the **final rendered** config for that target (after mappings + logic). |
-
-**Mode skip rule:** If an adapter does **not** support a mode (**quick** or **nix**) and the theme provides **no** enabling block for that mode (`apply_quick` / `apply_nix`), the CLI **SHOULD skip** that target with **non-zero exit** or **clear stderr** (implementation choice: default **warn and continue** for multi-target applies; document in CLI `--help`).
-
-### Mappings vs builtin defaults (merge)
-
-For each target `T`, adapters maintain a **documented intermediate structure** `M_builtin` (from Base16 + fonts + assets defaults).
-
-1. If **`targets.T.mappings`** is **absent**, use `M_builtin` only.
-2. If **present**, **deep-merge** `mappings` **onto** `M_builtin`: for each key, if both values are **objects**, recurse; otherwise the **theme value replaces** the builtin value (same as **`overrides`** semantics).
-3. Run **`logic`** hook if set (adapter-defined input/output on merged mapping + full theme).
-4. Render to **final config representation** (fragment text, nested dict, etc.).
-5. Deep-merge **`targets.T.overrides`** onto that render.
+- **`metadata.schema_version`:** **`"1"`** (v1 theme) or **`"2"`** (v2 theme).
+- **`metadata.name`:** kebab-case; MUST equal **`themes/<id>/`** folder when packed.
 
 ## Builtin adapters (summary)
 
 - Version adapters in code (e.g. `hyprland_v1`).
 - **Route** **`apply-quick`** → live paths; **`apply-nix`** → user Nix tree only.
 
-### `overrides` merge (unchanged)
+### `overrides` merge (v1)
 
-Objects: recursive deep merge. Arrays / scalars from `overrides`: **replace** whole value. Unknown keys: forward/strip/error **at emit** per adapter.
+Objects: recursive deep merge. Arrays / scalars: **replace**. Unknown keys: forward/strip/error at emit per adapter.
 
 ## Authoritative paths (quick vs Nix)
 
-- **`apply-quick`** writes **directly** to paths apps read (unless redirected by flags).
-- **`apply-nix`** writes only into **your Nix source tree**; **live** paths update when **`nixos-rebuild switch`** / **`home-manager switch`** installs them.
-- **If the same path is both quick-written and Nix-managed**, **`switch`** **overwrites** quick output—treat quick as **ephemeral** for those paths.
-
-**Standalone:** with only the CLI, nothing overwrites quick output until you run Nix or another tool.
+- **`apply-quick`** writes **directly** to live paths (unless flags override).
+- **`apply-nix`** writes only into **your Nix source tree**; materializes on **`nixos-rebuild switch`** / **`home-manager switch`**.
+- Overlap: **Nix wins** for the same path.
 
 ## CLI: apply modes
 
 | Command | Writes | Live targets |
 |---------|--------|--------------|
-| **`chromamancer apply-quick`** | Live paths (per adapter + `apply_quick`). | Immediately. |
-| **`chromamancer apply-nix`** | Nix config tree only (`apply_nix`). | After **`switch`**. |
+| **`chromamancer apply-quick`** | Live paths. | Immediately. |
+| **`chromamancer apply-nix`** | Nix tree only. | After **`switch`**. |
 
-**`apply-nix` output root:** user **`--out`** / **`CHROMAMANCER_NIX_OUT`** (names TBD).
+**`apply-nix` output root:** **`--out`** / **`CHROMAMANCER_NIX_OUT`**.
 
 Shared flags (conceptual): **`--theme`**, **`--pack`**, target filter, dry-run.
 
 ## Reference Nix (user-owned, no in-repo HM module)
 
-Use a **`runCommand`** (or packaged **`chromamancer`** in **`nativeBuildInputs`**) to regenerate files under e.g. `./generated/` consumed by **`home.file`**:
+Use **`runCommand`** (or packaged **`chromamancer`**) to regenerate files under **`./generated/`** consumed by **`home.file`**:
 
 ```nix
-# Sketch only — adjust paths and chromamancer package.
 chromamancerOut = pkgs.runCommand "chromamancer-generated" { nativeBuildInputs = [ chromamancerPkg ]; } ''
   mkdir -p $out
   chromamancer apply-nix \
     --theme ${./themes/my-theme/theme.jsonc} \
     --out $out
-    # or: --pack my-theme with CHROMAMANCER_THEMES_DIR set
 '';
-
-# home.file = { ".config/hypr/chromamancer.conf".source = "${chromamancerOut}/hypr/..."; };
 ```
 
-Reproducible themes should use **pack-relative assets**; pin **chromamancer** version.
+Reproducible themes: **pack-relative assets**; pin **chromamancer** version.
 
 ## Supported targets (roadmap)
 
@@ -141,33 +155,37 @@ Reproducible themes should use **pack-relative assets**; pin **chromamancer** ve
 | Qt         | Planned  | often rebuild-only |
 | Kvantum    | Planned  | often rebuild-only |
 | Quickshell | Planned  | TBD |
-| Albert     | Planned  | TBD |
+| Albert     | Partial  | mapping v1 + manual INI |
 
-## Fonts (v1)
+## Fonts
 
-**`fonts.ui.family`**, **`fonts.mono.family`** only. Sizes: HM / per-app / prefs. **v1** does not schema **per-target font overrides**; if needed later, add under **`targets.<id>`** with adapter support.
+**`fonts.ui.family`**, **`fonts.mono.family`** only (all versions). Per-target font overrides: future.
 
 ## Theme pack layout
 
-- **`themes/<id>/theme.jsonc`** — canonical; **`metadata.name`** = **d='id'** (`<id>` is kebab-case folder name).
-- **`assets/`** optional beside file.
-- Example copy: [`themes/_template/theme.example.jsonc`](../themes/_template/theme.example.jsonc).
+- **`themes/<id>/theme.jsonc`** — **`metadata.name`** = **`<id>`**.
+- **`assets/`** optional.
+- Templates: **[`themes/_template/theme.example.jsonc`](../themes/_template/theme.example.jsonc)** (v2), **[`theme.v1.legacy.jsonc`](../themes/_template/theme.v1.legacy.jsonc)** (v1 reference).
 
-**Nix `fromJSON`:** strip JSONC comments or generate strict JSON in CI.
+**Nix `fromJSON`:** strip JSONC comments or emit strict JSON in CI.
 
 ## Assets
 
-- **Preferred:** paths **relative to pack root** (directory of `theme.jsonc`).
-- **Absolute** paths: allowed for **local** `apply-quick`; **Nix builds** SHOULD use **pack-relative** paths for reproducibility.
+- **Preferred:** paths **relative to pack root**.
+- **Absolute:** OK for local **`apply-quick`**; Nix builds SHOULD use pack-relative paths.
 
 ## Security and path safety
 
-- Treat third-party **`theme.jsonc`** as **untrusted input**: review before **`apply`**.
-- Implementations MUST **normalize paths** and **reject** or **contain** **`..`** so outputs stay under **configured roots** (pack root for assets, output dir for writes).
+- Treat third-party theme/mapping files as **untrusted** until reviewed.
+- Normalize paths; **reject** **`..`** escaping configured roots.
 
 ## See also
 
 - [`specs/schemas/theme-v1.schema.json`](schemas/theme-v1.schema.json)
+- [`specs/schemas/theme-v2.schema.json`](schemas/theme-v2.schema.json)
+- [`specs/schemas/target-mapping-v1.schema.json`](schemas/target-mapping-v1.schema.json)
+- [`specs/canonical-colors.md`](canonical-colors.md)
+- [`targets/README.md`](../targets/README.md)
 - [`specs/logic-registry.md`](logic-registry.md)
 - [`themes/README.md`](../themes/README.md)
 - [`ARCHITECTURE.md`](../ARCHITECTURE.md)

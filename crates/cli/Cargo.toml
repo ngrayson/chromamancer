@@ -14,8 +14,6 @@ categories = ["command-line-utilities"]
 ratatui = "0.26"
 crossterm = "0.28"
 
-[dev-dependencies]
-
 [[bin]]
 name = "chromamancer"
 path = "src/main.rs"

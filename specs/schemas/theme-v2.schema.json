@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://localhost/chromamancer/theme-v2.schema.json",
+  "title": "chromamancer theme v2",
+  "description": "Theme pack: metadata, arbitrary color tokens (#RRGGBBAA), fonts, assets, canonical_assign (canonical key \u2192 token or literal). No embedded targets \u2014 use targets/<id>/mapping.jsonc.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "2",
+          "description": "Theme document v2; canonical colors + split target mappings."
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Theme id (kebab-case). Must match themes/<name>/ when packed."
+        },
+        "version": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "name"
+      ]
+    },
+    "tokens": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_-]*$": {
+          "$ref": "#/$defs/RgbaHex"
+        }
+      }
+    },
+    "canonical_assign": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "enum": [
+          "terminal.background",
+          "terminal.foreground",
+          "terminal.selection_background",
+          "terminal.selection_foreground",
+          "terminal.cursor",
+          "terminal.cursor_text",
+          "terminal.url",
+          "terminal.color0",
+          "terminal.color1",
+          "terminal.color2",
+          "terminal.color3",
+          "terminal.color4",
+          "terminal.color5",
+          "terminal.color6",
+          "terminal.color7",
+          "terminal.color8",
+          "terminal.color9",
+          "terminal.color10",
+          "terminal.color11",
+          "terminal.color12",
+          "terminal.color13",
+          "terminal.color14",
+          "terminal.color15",
+          "qt.kvantum.window",
+          "qt.kvantum.base",
+          "qt.kvantum.alt_base",
+          "qt.kvantum.button",
+          "qt.kvantum.light",
+          "qt.kvantum.mid_light",
+          "qt.kvantum.dark",
+          "qt.kvantum.mid",
+          "qt.kvantum.highlight",
+          "qt.kvantum.inactive_highlight",
+          "qt.kvantum.text",
+          "qt.kvantum.window_text",
+          "qt.kvantum.button_text",
+          "qt.kvantum.inactive_text",
+          "qt.kvantum.disabled_text",
+          "qt.kvantum.tooltip_base",
+          "qt.kvantum.tooltip_text",
+          "qt.kvantum.highlight_text",
+          "qt.kvantum.link",
+          "qt.kvantum.link_visited",
+          "albert.palette.base",
+          "albert.palette.text",
+          "albert.palette.window",
+          "albert.palette.window_text",
+          "albert.palette.button",
+          "albert.palette.button_text",
+          "albert.palette.highlight",
+          "albert.palette.highlight_text",
+          "albert.palette.placeholder_text",
+          "albert.palette.link",
+          "albert.palette.link_visited",
+          "albert.window.input_background_brush",
+          "albert.window.input_border_brush",
+          "albert.window.input_trigger_color",
+          "albert.window.input_hint_color",
+          "albert.window.settings_button_color",
+          "albert.window.settings_button_highlight_color",
+          "albert.window.result_item_selection_background_brush",
+          "albert.window.result_item_selection_border_brush",
+          "albert.window.result_item_selection_text_color",
+          "albert.window.result_item_selection_subtext_color",
+          "albert.window.result_item_text_color",
+          "albert.window.result_item_subtext_color",
+          "albert.window.action_item_selection_background_brush",
+          "albert.window.action_item_selection_border_brush",
+          "albert.window.action_item_selection_text_color",
+          "albert.window.action_item_text_color"
+        ]
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/CanonValue"
+      }
+    },
+    "fonts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ui": {
+          "$ref": "#/$defs/FontFamily"
+        },
+        "mono": {
+          "$ref": "#/$defs/FontFamily"
+        }
+      },
+      "required": [
+        "ui",
+        "mono"
+      ]
+    },
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "wallpaper": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "metadata",
+    "tokens",
+    "canonical_assign",
+    "fonts"
+  ],
+  "$defs": {
+    "RgbaHex": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{8}$"
+    },
+    "FontFamily": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family"
+      ],
+      "properties": {
+        "family": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "CanonValue": {
+      "description": "Token name (must exist in tokens), #RRGGBBAA literal, or transparent for Albert window borders.",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{8}$"
+        },
+        {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]*$"
+        },
+        {
+          "const": "transparent"
+        }
+      ]
+    }
+  }
+}

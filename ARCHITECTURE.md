@@ -4,29 +4,43 @@ Spec-driven desktop theming: live apply, Nix/HM, theme packs, multi-target (Kitt
 
 ## Overview
 
-chromamancer is a **Rust workspace**, **specs** + JSON Schema, **`themes/`** packs (each with **`theme.jsonc`**), and an optional **Nix devShell**. **Bootstrap** is a **standalone CLI**. Each **`theme.jsonc`** carries **`tokens`** (Base16 palette), **`fonts`**, optional **`assets`**, and optional **`targets`** (mappings + optional **`apply_quick`** / **`apply_nix`** blocks per target). **Builtin adapters** interpret that file and apply **`apply-quick`** (live paths) or **`apply-nix`** (Nix tree only). First-party HM/NixOS modules are **deferred**—see `nix/modules/README.md`.
+chromamancer is a **Rust workspace**, **specs** + JSON Schema, **`themes/`** packs (**`theme.jsonc`**), repo-level **`targets/<id>/mapping.jsonc`**, and an optional **Nix devShell**. **Bootstrap** is a **standalone CLI**.
+
+**Theme v2 (preferred):** arbitrary named **`tokens`** (`#RRGGBBAA`) and **`canonical_assign`** → stable semantic keys ([`specs/canonical-colors.md`](specs/canonical-colors.md)). **No** embedded per-app `targets` on the theme.
+
+**Theme v1 (legacy):** fixed Base16 `base00`–`base0F` + optional **`targets.<id>`** (`mappings`, `apply_quick`, `apply_nix`).
+
+**Target mappings:** **`targets/<id>/mapping.jsonc`** defines **canonical → native** projection and optional **`apply_nix`** defaults (see [`targets/README.md`](targets/README.md)). Discovered via **`CHROMAMANCER_TARGETS_DIR`** (repo root by default).
+
+**Builtin adapters** resolve **theme → canonical table → native artifacts** for **`apply-quick`** / **`apply-nix`**. First-party HM/NixOS modules are **deferred**—`nix/modules/README.md`.
 
 ## Pillars
 
-1. **Fast iteration — `chromamancer apply-quick`** writes **straight to live target paths** using **`targets.<id>.apply_quick`** when present; **`apply-nix`** uses **`targets.<id>.apply_nix`** for layout under your Nix tree; **`switch`** materializes (see `specs/SPEC.md`).
-2. **Nix (optional)** — `nix/flake.nix` is **devShell** for now; users own integration. When Nix installs the same paths, **rebuild overwrites** CLI-written files there.
-3. **Schematic themes** — `specs/schemas/` validates **`theme.jsonc`**; `specs/SPEC.md` is the human index.
-4. **Theme packs** — directories under `themes/<id>/` with **`theme.jsonc`** (+ `assets/`).
+1. **Fast iteration — `chromamancer apply-quick`** writes live paths; **`apply-nix`** writes under your Nix tree; **`switch`** materializes (`specs/SPEC.md`).
+2. **Nix (optional)** — `nix/flake.nix` is **devShell**; rebuild overwrites overlapping quick output.
+3. **Schematic contracts** — `specs/schemas/` (`theme-v1`, **`theme-v2`**, **`target-mapping-v1`**); [`SPEC.md`](specs/SPEC.md) + [`canonical-colors.md`](specs/canonical-colors.md).
+4. **Theme packs** — `themes/<id>/theme.jsonc` + optional **`assets/`**.
 
 ## Directory structure
 
 ```
 .
-├── Cargo.toml              # workspace root
-├── crates/cli/             # binary chromamancer; builtin adapters (e.g. src/targets/)
+├── Cargo.toml
+├── crates/cli/
 ├── nix/
-│   ├── flake.nix
-│   └── modules/            # deferred HM/NixOS
 ├── specs/
 │   ├── SPEC.md
+│   ├── canonical-colors.md
 │   ├── logic-registry.md
 │   └── schemas/
-│       └── theme-v1.schema.json
+│       ├── theme-v1.schema.json
+│       ├── theme-v2.schema.json
+│       └── target-mapping-v1.schema.json
+├── targets/
+│   ├── README.md
+│   ├── kitty/mapping.jsonc
+│   ├── kvantum/mapping.jsonc
+│   └── albert/mapping.jsonc
 └── themes/
     ├── README.md
     └── _template/
@@ -35,32 +49,31 @@ chromamancer is a **Rust workspace**, **specs** + JSON Schema, **`themes/`** pac
 ## Data flow
 
 ```
-specs/schemas/theme-v1.schema.json  ──validate──►  themes/*/theme.jsonc
-                                      │
-              ┌───────────────────────┴────────────────────────┐
-              ▼                                                ▼
-    builtin adapters (Rust)                         user Nix / HM (optional)
-    theme + targets → per-target artifacts          installs generated files on switch
+theme.jsonc (v1 or v2)  ──validate──►  JSON Schema
+      │                                      │
+      ▼                                      ▼
+  v2: tokens + canonical_assign        targets/<id>/mapping.jsonc
+      → resolved canonical colors   +    (canonical → native)
+      │
+      └──────────────────────────►  adapters → per-target configs
 ```
 
 ## Technology stack
 
 - **Rust** — CLI and adapters.
-- **Nix** — dev shell; future packaging/modules.
-- **JSON Schema** — [`specs/schemas/theme-v1.schema.json`](specs/schemas/theme-v1.schema.json); hooks in [`specs/logic-registry.md`](specs/logic-registry.md).
+- **Nix** — dev shell; future packaging.
+- **JSON Schema** — theme + target-mapping; canonical key catalog in markdown.
 
 ## Key decisions
 
-- **Theme file** — **`themes/<id>/theme.jsonc`**; **`metadata.name`** = **`<id>`**; **`metadata.schema_version`** **`"1"`**.
-- **Workspace layout** — `crates/cli`; binary **`chromamancer`**.
-- **Spec before codegen** — version schemas before locking generators.
-- **v1 palette** — Base16 `base00`–`base0F`, **`#RRGGBBAA`**, required **`fonts.ui` / `fonts.mono`** (families only).
-- **Bootstrap delivery** — standalone CLI; no required flake/HM from this repo.
-- **Target adapters** — Rust builtins: defaults, mode routing, imperative **`logic`** hooks referenced from `theme.jsonc`.
-- **Apply model** — **apply-quick** vs **apply-nix**; Nix **switch** authoritative for paths it owns.
+- **Theme path** — **`themes/<id>/theme.jsonc`**; **`metadata.name`** = **`<id>`**; **`schema_version`** **`"1"`** or **`"2"`**.
+- **v2 palette** — freeform **`tokens`**; semantics via **`canonical_assign`** only.
+- **v1 palette** — Base16 slots; optional embedded **`targets`**.
+- **`CHROMAMANCER_TARGETS_DIR`** — root for **`targets/`** tree (default: repo root).
+- **Apply model** — **apply-quick** vs **apply-nix**; Nix **switch** wins on overlap.
 
 ## Future considerations
 
 - Watch mode / reload helpers.
-- Tighter JSON Schemas per `targets.<id>`.
-- CI: validate `themes/*`, **`metadata.name`** vs directory, `cargo test`, flake checks.
+- Tighter schemas per emitted format.
+- CI: validate `themes/*` (v1+v2), `targets/*/mapping.jsonc`, **`metadata.name`** vs directory, `cargo test`.

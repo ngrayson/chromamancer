@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://localhost/chromamancer/target-mapping-v1.schema.json",
+  "title": "chromamancer target mapping v1",
+  "description": "Per-target canonical → native key map and optional apply_quick / apply_nix defaults. File: targets/<target_id>/mapping.jsonc",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "target_id"],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "1"
+        },
+        "target_id": {
+          "type": "string",
+          "enum": [
+            "hyprland",
+            "kitty",
+            "gtk",
+            "qt",
+            "kvantum",
+            "quickshell",
+            "albert"
+          ]
+        },
+        "comment": { "type": "string" }
+      }
+    },
+    "canonical_to_native": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Canonical color key → native config key path (adapter-defined string; e.g. Kitty color0, Kvantum GeneralColors.window.color).",
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "apply_quick": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional defaults for chromamancer apply-quick (paths, flags)."
+    },
+    "apply_nix": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional defaults for chromamancer apply-nix (e.g. themes_dir, theme_file_template)."
+    }
+  },
+  "required": ["metadata", "canonical_to_native"]
+}
