@@ -1,14 +1,15 @@
 # Specification index — chromamancer
 
-Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kitty, GTK, Qt, Quickshell, Albert, Hyprland)
+Spec-driven desktop theming: live apply, Nix/HM, theme packs, multi-target (Kitty, GTK, Qt, Quickshell, Albert, Hyprland)
 
 ## How we work (spec-driven)
 
-1. **Contracts live in** `specs/schemas/`. Version them (`scheme-v1`, later `scheme-v2`) before adding generators or Nix glue.
-2. **Schemes are data** under `schemes/<name>/`. They must validate against the active schema (tooling TBD).
-3. **`scheme.json` is portable look data** — Base16 `tokens`, `fonts`, `assets`. **Default mapping** from our names to each app’s config (and transforms like derived borders) lives in **target adapters** inside chromamancer; you add targets one adapter at a time.
-4. **Iteration vs system of record:** see **Apply model** below — CLI for fast targets during dev; when you adopt Nix for the same paths, **NixOS / Home Manager activation** replaces generated outputs.
-5. **Bootstrap delivery (current phase):** chromamancer ships as a **standalone CLI**—a normal program you run (`chromamancer …`). It is **not** gated on **flakes** or **Home Manager**: there is no required first-party `homeManagerModules` / `nixosModules` output in this phase. Optional **devShell** in `nix/flake.nix` is only for building/hacking. **Later phase:** first-party Nix modules or flake installables if we choose to add them.
+1. **Contracts live in** `specs/schemas/`. Version them (`theme` / `scheme-v1` today, later `v2`) before hard-coding generators.
+2. **Theme packs** live under **`themes/<theme-id>/`**. Each pack has a single **`theme.jsonc`** (see below) validated after JSONC parse.
+3. **One theme file** holds **palette + typography + assets** and **per-target configuration**: mappings from this theme to each target, plus **optional** `apply_quick` / **`apply_nix`** sections (either or both per target) and optional imperative **`logic`** hooks.
+4. **Builtin target adapters** in chromamancer (Rust) provide **defaults**, **mode routing** (`apply-quick` vs `apply-nix`), and **logic** that cannot live in data. The theme file **extends or overrides** declaratively; we add targets by shipping adapters **and** documenting the `targets.<id>` shape.
+5. **Iteration vs system of record:** see **Apply model** — `apply-quick` vs Nix **`switch`**.
+6. **Bootstrap:** standalone CLI; no required flake/HM module in-repo (see earlier sections / `nix/modules/README.md`).
 
 ## Colors (v1): Base16 canonical names
 
@@ -37,100 +38,107 @@ Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kit
 | `base0E` | magenta | secondary accent, keyword emphasis |
 | `base0F` | brown / deprecated | rare accents, legacy chrome |
 
-**Swapping themes:** replace the pack (or `tokens` / `fonts` / `assets` data). Adapters stay the same so the same look applies everywhere.
+**Swapping themes:** replace the pack (`tokens`, `fonts`, `assets`, `targets` as needed). Builtin adapters stay versioned in the tool.
 
-## Target adapters (mapping + logic)
+## Theme document (`theme.jsonc`) and `targets`
 
-**Not in `scheme.json` by default:** the rules that say “`base0D` → Hyprland `general:col.active_border`” (and any **logic**—blending alpha, rounding, template snippets) live in **chromamancer**, one **adapter per target** (Rust first; Nix can call the CLI, reuse shared tables, or embed parallel logic documented to stay in sync).
+**Canonical path:** `themes/<theme-id>/theme.jsonc` (JSONC on disk; `.jsonc` suffix documents intent—parser treats as JSON-with-comments).
 
-- **Version adapters** with the tool (e.g. `hyprland_v1`) so old schemes keep working when mapping tables change.
-- **Add targets incrementally** — shipping a new adapter enables that target for **all** scheme packs without editing each pack.
-- **Optional `target_overrides`** in `scheme.json` — per-target JSON objects merged **on top of** adapter output when a particular palette needs an exception (rare); shape is adapter-defined. **Merge semantics** are fixed (see below).
+**Required top-level:** `metadata`, `tokens`, `fonts`. **Optional:** `assets`, **`targets`**.
 
-### `target_overrides` merge semantics (v1)
+### `targets` object
 
-**Merge order:** for each target id `T` (e.g. `hyprland`), start from the adapter’s **default output object** (from `tokens`, `fonts`, `assets`), then merge **`target_overrides[T]`** on top. **Override wins** when both sides define the same key.
+Keys are **target ids** (`hyprland`, `kitty`, `gtk`, …). Each value is an object that may include:
 
-**Objects:** if both values are JSON **objects**, merge **recursively** with the same rule at each level.
+| Key | Purpose |
+|-----|---------|
+| **`mappings`** | Declarative map from **Base16 / theme slots** into this target’s **intermediate config model** (shape is **per-adapter**; JSON Schema will tighten over time). |
+| **`apply_quick`** | Optional block used **only** when running **`chromamancer apply-quick`** (e.g. path hints, fragment names). **Omit** → adapter defaults for quick mode. |
+| **`apply_nix`** | Optional block used **only** when running **`chromamancer apply-nix`** (e.g. relative paths inside your Nix tree). **Omit** → adapter defaults for nix mode. |
+| **`logic`** | Optional string id referencing **builtin imperative** behavior (transforms the adapter implements when data alone is not enough). Format **per adapter**. |
+| **`overrides`** | Optional object **deep-merged** over the fully rendered target config (after mappings + builtin logic). Same merge rules as below. |
 
-**Arrays, strings, numbers, booleans, null:** if the **override** value for a key is **not** a JSON object, it **replaces** the adapter’s value for that key in full. In particular, **arrays are replaced whole**—no element-by-element merge in v1 unless a **specific adapter** documents otherwise.
+**Per target, both `apply_quick` and `apply_nix` may exist, one may exist, or neither** (then the adapter’s defaults define what each command does—for example **rebuild-only** targets might only consult `apply_nix` or ignore quick). **`apply-quick`** / **`apply-nix`** commands skip a target if the adapter deems that mode unsupported **and** the theme provides no enabling block—exact behavior per adapter, documented in tests.
 
-**Unknown keys:** keys that appear only in `target_overrides` are merged in like any others. There is **no** global step that rejects unknown override keys. **Each adapter** decides at **emit time** whether to forward them, strip them, or **fail** (e.g. if the target format is strict). Adapters should document behavior; prefer **explicit errors** over silent data loss for strict downstreams.
+### Builtin adapters (in chromamancer)
 
-Default Base16 → Qt/Kvantum-style roles remains documented in the **Colors** table above; each adapter’s concrete key list will be spelled out in adapter-specific docs or tests as we implement.
+- Implement **default mappings** and **logic** when `mappings` / `logic` are absent or partial.
+- **Version** adapters (e.g. `hyprland_v1`) so old `theme.jsonc` files keep working.
+- **Route** output to **live target files** (`apply-quick`) vs **Nix tree only** (`apply-nix`).
+- Add new targets by adding an adapter + documenting the `targets.<id>` contract.
+
+### `targets.<id>.overrides` merge semantics (v1)
+
+**Merge order** for target `T`: start from the adapter’s **rendered config** (tokens + fonts + assets + **`mappings`** + **`logic`**), then deep-merge **`overrides`**. **Override wins** on key conflicts.
+
+**Objects:** recursive deep merge.
+
+**Non-objects (including arrays):** replace whole value from `overrides`.
+
+**Unknown keys:** merged in; **emit-time** strictness is per adapter.
 
 ## Apply model: fast iteration vs Nix
 
 **Standalone bootstrap:** if you **only** run the chromamancer CLI, it is the **sole** writer to the paths you configure—nothing automatically overwrites its output until **you** introduce another mechanism (Nix, another tool, etc.).
 
-**When you use Nix for the same paths:** the rules below apply.
+**When you use Nix for the same paths:** **`nixos-rebuild switch`** / **`home-manager switch`** installs from your config and **overwrites** live paths that Nix manages.
 
-**Two classes of target (per adapter):**
+**Two classes of target (typical):**
 
-1. **Fast-iterative** — chromamancer **CLI** can regenerate outputs under the live config tree and, where the app supports it, **reload** so you can tune a look quickly. Typical for file-based configs that accept included fragments (e.g. Hyprland, Kitty); exact list is per-adapter documentation.
-2. **Rebuild-only** — outputs are only sensible to apply as part of **NixOS / Home Manager** activation (no hot reload, or generation is tied to store paths / system state). Iteration loop is **edit scheme → rebuild**, not `chromamancer apply`.
+1. **Fast-iterative** — `apply-quick` writes **directly** to files the app reads; reload when possible.
+2. **Rebuild-only** — sensible output is **`apply-nix`** into your flake tree; live paths update on **`switch`**, not from quick.
 
-**Authoritative Nix (when you opt in):** if **`nixos-rebuild`** / **`home-manager switch`** (or equivalent) **installs** the same generated paths chromamancer uses, that activation **regenerates** those files (via **your** `runCommand`, **future** first-party module, etc.) and **overwrites** anything the CLI wrote there. Treat overlapping **CLI apply** as **dev-time** in that case; persistent state belongs in **your** Nix-expressed scheme inputs and derivations.
-
-**Implication:** after a rebuild that manages those paths, on-disk theme files should match **what Nix installed**, not stale CLI tweaks—unless paths are intentionally disjoint (CLI → dev copy, Nix → production copy).
+**Authoritative Nix (when you opt in):** same as before—Nix activation owns files it installs.
 
 ## CLI: apply modes (bootstrap)
 
-The tool exposes **two** apply entry points. They share the **same** generation pipeline (scheme + adapters + merge); they differ in **where outputs are written** and **who** eventually owns the live target files.
+They share the **same pipeline** (`theme.jsonc` + adapters + merge).
 
 | Command | Writes to | Live target files |
 |---------|-----------|-------------------|
-| **`chromamancer apply-quick`** | **Directly** to the **actual paths** each running target reads (e.g. the real Hyprland / Kitty fragment or config paths under **`$XDG_CONFIG_HOME`**—exact paths **per adapter**). | Updated **immediately** by chromamancer; reload/restart as needed. |
-| **`chromamancer apply-nix`** | **Only** into your **Nix configuration tree** (paths your flake / Home Manager / NixOS config imports—e.g. `generated/` in your dotfiles). **Not** to live `~/.config` as the first hop. | Written when you run **`nixos-rebuild switch`** / **`home-manager switch`** (or equivalent): Nix **activates** and installs from the store (or equivalent) **into** those target paths. |
+| **`chromamancer apply-quick`** | **Directly** to paths each running target reads (per adapter, using `apply_quick` from `theme.jsonc` when present). | Immediately; reload/restart as needed. |
+| **`chromamancer apply-nix`** | **Only** your **Nix configuration tree** (using `apply_nix` when present). | After **`switch`**, Nix materializes into target paths. |
 
-For **`apply-nix`**, the output location inside the Nix tree is **user-configured** (e.g. **`--out`** and/or **`CHROMAMANCER_NIX_OUT`**—exact names TBD) so it matches how your modules reference generated files.
+Output root for **`apply-nix`** remains **user-configured** (`--out` / env—names TBD).
 
-**Workflow:** use **`apply-quick`** while iterating locally; use **`apply-nix`** so committed Nix config + **`switch`** is what lands on disk for production. After a successful **`switch`**, live files should match what Nix installed—not stale **`apply-quick`** edits unless your Nix expressions point at the same paths (usually avoid mixing without intent).
+**Workflow:** **`apply-quick`** for iteration; **`apply-nix`** + commit + **`switch`** for durable system state.
 
-Shared flags (conceptual): scheme path / pack id, target selection, dry-run—specified when implementing.
+Shared flags (conceptual): path to **`theme.jsonc`**, target selection, dry-run—TBD in implementation.
 
 ## Supported targets (adapter roadmap)
 
 | Target        | Role of adapter | Typical iteration class |
 |---------------|-----------------|-------------------------|
-| Kitty         | Map Base16 → terminal colors + `fonts.mono.family`; optional overrides | usually **fast** |
-| GTK           | Palette / theme fragments from Base16 + `fonts.ui.family` | often **rebuild-only** |
-| Qt / Kvantum  | `QPalette` / Kvantum-related output + `fonts.ui.family` | often **rebuild-only** |
-| Quickshell    | Bar / lock theming from tokens + assets | **TBD** per setup |
-| Albert        | QSS / theme from palette | **TBD** |
-| Hyprland      | `general:col.*`, decoration-related keys from mapping + logic | usually **fast** |
-
-Exact **fast vs rebuild-only** is declared per adapter when implemented; the table is planning guidance only.
+| Kitty         | Map Base16 + `targets.kitty` → terminal + font family | usually **fast** |
+| GTK           | Palette / fragments | often **rebuild-only** |
+| Qt / Kvantum  | QPalette / Kvantum-related | often **rebuild-only** |
+| Quickshell    | Bar / lock | **TBD** |
+| Albert        | QSS / theme | **TBD** |
+| Hyprland      | `general:col.*`, decoration | usually **fast** |
 
 ## Fonts (v1): global `fonts`
 
-The scheme carries **which typefaces** belong to the look, not **how big** they are—font sizes stay in Nix/Home Manager options, per-target configs (e.g. Kitty), or personal prefs so DPI and ergonomics do not fight the palette.
+Same as before: **`fonts.ui.family`**, **`fonts.mono.family`** only (no sizes in theme). Sizes in HM / per-app config / prefs.
 
-**v1 requires both slots:** `fonts.ui` and `fonts.mono` are always present in a valid scheme (JSON Schema enforces this). Qt/GTK-side generators use `ui`; terminal-style targets use `mono`. If you want one typeface everywhere, set both `family` strings to the same value.
+## Theme pack layout
 
-- **`fonts.ui.family`** — proportional UI face (GTK, Qt/Kvantum, shell UI text where applicable).
-- **`fonts.mono.family`** — monospace face (terminal, code-ish UI).
+- **Directory:** `themes/<theme-id>/`.
+- **File:** **`theme.jsonc`** (required) — JSONC; validates against [`specs/schemas/scheme-v1.schema.json`](specs/schemas/scheme-v1.schema.json) on the **parsed JSON** value.
+- **Assets:** optional `assets/` beside the file; paths in `assets` are relative to the pack root unless stated otherwise.
+- **Discovery:** CLI loads **`themes/<id>/theme.jsonc`** only (v1).
 
-Each `family` is a **Linux-usable font family string** (usually a Fontconfig family name).
-
-## Scheme pack file (v1)
-
-- **Path:** `schemes/<scheme-id>/scheme.json` at the pack root (fixed filename; no nested-only layout in v1).
-- **Syntax:** **JSONC** — JSON plus line (`//`) and block (`/* … */`) comments. Plain **JSON** (no comments) is always valid.
-- **Semantics:** After parsing comments away, the document must validate against `specs/schemas/scheme-v1.schema.json` (structure is still “JSON” for schema tooling).
-- **Optional:** `target_overrides` — see **Target adapters** above.
-- **Nix note:** `builtins.fromJSON` / `readFile`+`fromJSON` only accept strict JSON. Nix-side pipelines should either consume a **generated JSON** artifact (e.g. `chromamancer dump-json`, a flake `runCommand` with a JSONC parser) or keep a machine-produced `scheme.json` without comments for import.
+**Nix note:** `builtins.fromJSON` needs strict JSON; use a build step or export without comments when importing from Nix.
 
 ## Assets
 
-Schemes may reference **wallpapers**, **avatars**, and other images. Paths should be **relative to the scheme directory** or explicitly declared so Nix can copy them into the store.
+Theme packs may reference **wallpapers**, **avatars**, etc.; paths **relative to the pack directory** (or explicit) so Nix can copy into the store when needed.
 
 ## Security
 
-Do **not** store secrets in scheme files. Treat schemes as **public** configuration and assets.
+Do **not** store secrets in `theme.jsonc`. Treat themes as **public** configuration and assets.
 
 ## See also
 
-- `specs/schemas/scheme-v1.schema.json` — v1 JSON Schema (Base16 + `#RRGGBBAA` + fonts + optional `target_overrides`); instance documents are **JSONC** on disk (`scheme.json`).
-- `schemes/README.md` — layout for scheme packs.
-- `ARCHITECTURE.md` — repository layout and data flow.
+- `specs/schemas/scheme-v1.schema.json` — v1 JSON Schema (theme document).
+- `themes/README.md` — pack layout.
+- `ARCHITECTURE.md` — repo layout and data flow.

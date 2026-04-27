@@ -25,7 +25,7 @@ alwaysApply: true
 
 This is chromamancer, a desktop-theme project.
 
-Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kitty, GTK, Qt, Quickshell, Albert, Hyprland)
+Spec-driven desktop theming: live apply, Nix/HM, theme packs, multi-target (Kitty, GTK, Qt, Quickshell, Albert, Hyprland)
 
 ## General Best Practices
 

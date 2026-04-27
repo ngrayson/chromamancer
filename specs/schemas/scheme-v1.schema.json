@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://localhost/chromamancer/scheme-v1.schema.json",
-  "title": "chromamancer scheme v1",
-  "description": "Portable color + font + asset scheme (JSONC on disk). v1: Base16 tokens, global font families, optional assets, optional target_overrides. Default Base16→target mapping lives in chromamancer adapters, not in this file.",
+  "title": "chromamancer theme v1",
+  "description": "Validates the JSON value inside themes/*/theme.jsonc (JSONC on disk). v1: Base16 tokens, fonts, optional assets, optional per-target targets{} (mappings, apply_quick, apply_nix, overrides, logic). Builtin Rust adapters supply defaults and imperative behavior; the theme file extends or replaces declaratively.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -12,11 +12,11 @@
       "properties": {
         "name": {
           "type": "string",
-          "description": "Display id for this scheme pack (often matches directory name under schemes/)."
+          "description": "Theme id (often matches directory name under themes/)."
         },
         "version": {
           "type": "string",
-          "description": "Scheme pack revision (authoring), not the schema revision."
+          "description": "Theme pack revision (authoring), not the schema revision."
         },
         "author": { "type": "string" }
       },
@@ -24,7 +24,7 @@
     },
     "tokens": {
       "type": "object",
-      "description": "Canonical Base16 palette. Keys are base00..base0F; values #RRGGBBAA. Generators map these to terminals, QPalette/Kvantum, GTK, Hyprland, etc.",
+      "description": "Canonical Base16 palette. Keys base00..base0F; values #RRGGBBAA.",
       "additionalProperties": false,
       "properties": {
         "base00": { "$ref": "#/$defs/RgbaHex" },
@@ -65,7 +65,7 @@
     },
     "fonts": {
       "type": "object",
-      "description": "Global font *family* names only. Sizes and weights belong in Home Manager, target configs, or user preferences—not in the scheme.",
+      "description": "Global font family names only (no sizes).",
       "additionalProperties": false,
       "properties": {
         "ui": { "$ref": "#/$defs/FontFamily" },
@@ -75,17 +75,46 @@
     },
     "assets": {
       "type": "object",
-      "description": "Paths relative to scheme directory root unless noted otherwise.",
+      "description": "Paths relative to theme pack directory unless noted otherwise.",
       "additionalProperties": false,
       "properties": {
         "wallpaper": { "type": "string" },
         "avatar": { "type": "string" }
       }
     },
-    "target_overrides": {
+    "targets": {
       "type": "object",
-      "description": "Optional per-target objects deep-merged over adapter defaults (see SPEC.md, target_overrides merge). Keys = target ids. Unknown keys: per-adapter handling at emit time.",
-      "additionalProperties": true
+      "description": "Per-target mapping and apply-mode config. Keys = target ids (hyprland, kitty, …). See SPEC.md (Theme document / targets).",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "mappings": {
+            "type": "object",
+            "description": "Declarative map from Base16 keys (or semantic slots) to this target’s config model—shape defined per adapter.",
+            "additionalProperties": true
+          },
+          "apply_quick": {
+            "type": "object",
+            "description": "Optional settings used only for apply-quick (e.g. paths, fragments). Omitted → adapter defaults.",
+            "additionalProperties": true
+          },
+          "apply_nix": {
+            "type": "object",
+            "description": "Optional settings used only for apply-nix (e.g. relative paths inside the Nix tree). Omitted → adapter defaults.",
+            "additionalProperties": true
+          },
+          "logic": {
+            "type": "string",
+            "description": "Optional builtin logic hook id (e.g. adapter-specific transforms). Format TBD per adapter."
+          },
+          "overrides": {
+            "type": "object",
+            "description": "Deep-merged over the rendered config after mappings + builtin logic; same merge rules as SPEC.",
+            "additionalProperties": true
+          }
+        }
+      }
     }
   },
   "required": ["metadata", "tokens", "fonts"],
@@ -93,7 +122,7 @@
     "RgbaHex": {
       "type": "string",
       "pattern": "^#[0-9A-Fa-f]{8}$",
-      "description": "RGB + alpha, eight hex digits after #. Opaque colors use FF (e.g. #1a1b26FF)."
+      "description": "RGB + alpha, eight hex digits after #."
     },
     "FontFamily": {
       "type": "object",
@@ -103,7 +132,7 @@
         "family": {
           "type": "string",
           "minLength": 1,
-          "description": "Font family as consumed on Linux (e.g. Fontconfig family name). Targets may normalize."
+          "description": "Fontconfig-style family name."
         }
       }
     }

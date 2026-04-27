@@ -1,6 +1,6 @@
 # chromamancer
 
-Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kitty, GTK, Qt, Quickshell, Albert, Hyprland)
+Spec-driven desktop theming: live apply, Nix/HM, theme packs (`theme.jsonc`), multi-target (Kitty, GTK, Qt, Quickshell, Albert, Hyprland)
 
 ## Getting Started
 
