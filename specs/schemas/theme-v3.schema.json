@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://localhost/chromamancer/theme-v3.schema.json",
+  "title": "chromamancer theme v3",
+  "description": "Theme pack: metadata, arbitrary color tokens (#RRGGBBAA), fonts, assets, shim_assign (semantic shim \u2192 token or literal). Targets map shims \u2192 native via targets/<id>/mapping.jsonc (target-mapping v2).",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "3",
+          "description": "Theme document v3; shim vocabulary + split target mappings (shim_to_native)."
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Theme id (kebab-case). Must match themes/<name>/ when packed."
+        },
+        "version": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "name"
+      ]
+    },
+    "tokens": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_-]*$": {
+          "$ref": "#/$defs/RgbaHex"
+        }
+      }
+    },
+    "shim_assign": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "enum": [
+          "background",
+          "foreground",
+          "selection_background",
+          "selection_foreground",
+          "cursor",
+          "cursor_text",
+          "url",
+          "palette_0",
+          "palette_1",
+          "palette_2",
+          "palette_3",
+          "palette_4",
+          "palette_5",
+          "palette_6",
+          "palette_7",
+          "palette_8",
+          "palette_9",
+          "palette_10",
+          "palette_11",
+          "palette_12",
+          "palette_13",
+          "palette_14",
+          "palette_15",
+          "window",
+          "base",
+          "alt_base",
+          "button",
+          "light",
+          "mid_light",
+          "dark",
+          "mid",
+          "chrome_focus",
+          "chrome_focus_muted",
+          "chrome_focus_text",
+          "text",
+          "window_text",
+          "button_text",
+          "inactive_text",
+          "disabled_text",
+          "tooltip_base",
+          "tooltip_text",
+          "link",
+          "link_visited",
+          "placeholder_text",
+          "list_selection",
+          "list_subtext",
+          "list_selection_foreground",
+          "list_selection_subtext",
+          "selection_border"
+        ]
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/ShimValue"
+      }
+    },
+    "fonts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ui": {
+          "$ref": "#/$defs/FontFamily"
+        },
+        "mono": {
+          "$ref": "#/$defs/FontFamily"
+        }
+      },
+      "required": [
+        "ui",
+        "mono"
+      ]
+    },
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "wallpaper": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "metadata",
+    "tokens",
+    "shim_assign",
+    "fonts"
+  ],
+  "$defs": {
+    "RgbaHex": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{8}$"
+    },
+    "FontFamily": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family"
+      ],
+      "properties": {
+        "family": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ShimValue": {
+      "description": "Token name (must exist in tokens), #RRGGBBAA / #RRGGBB literal, or transparent (e.g. selection_border).",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{8}$"
+        },
+        {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]*$"
+        },
+        {
+          "const": "transparent"
+        }
+      ]
+    }
+  }
+}

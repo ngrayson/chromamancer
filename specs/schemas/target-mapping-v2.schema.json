@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://localhost/chromamancer/target-mapping-v2.schema.json",
+  "title": "chromamancer target mapping v2",
+  "description": "Per-target shim \u2192 native key map and optional apply_quick / apply_nix defaults. File: targets/<target_id>/mapping.jsonc",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "target_id"],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "2"
+        },
+        "target_id": {
+          "type": "string",
+          "enum": [
+            "hyprland",
+            "kitty",
+            "gtk",
+            "qt",
+            "kvantum",
+            "quickshell",
+            "albert"
+          ]
+        },
+        "comment": { "type": "string" }
+      }
+    },
+    "shim_to_native": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Semantic shim (see specs/shim-colors.md) \u2192 native config key path(s). Use a string for one target field, or a non-empty array when one shim fans out to multiple native keys (e.g. Albert).",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        ]
+      }
+    },
+    "apply_quick": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional defaults for chromamancer apply-quick (paths, flags)."
+    },
+    "apply_nix": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional defaults for chromamancer apply-nix (e.g. themes_dir, theme_file_template)."
+    }
+  },
+  "required": ["metadata", "shim_to_native"]
+}

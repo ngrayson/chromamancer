@@ -1,8 +1,6 @@
-# Canonical color keys (v2)
+# Canonical color keys (v2, legacy)
 
-Stable **dotted identifiers** for [`theme-v2.schema.json`](schemas/theme-v2.schema.json) **`canonical_assign`**. Each key resolves to **`#RRGGBBAA`** after looking up the theme **`tokens`** (or accepts a literal hex / special literal where noted).
-
-Adapters: **theme → canonical table** (resolved colors), then **`targets/<id>/mapping.jsonc`** maps **canonical key → native** config path.
+Stable **dotted identifiers** for [`theme-v2.schema.json`](schemas/theme-v2.schema.json) **`canonical_assign`**. **New themes** should prefer **[`theme-v3.schema.json`](schemas/theme-v3.schema.json)** + **[`shim-colors.md`](shim-colors.md)** and **`shim_to_native`** mappings.
 
 ## Terminal (Kitty-oriented)
 

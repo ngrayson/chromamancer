@@ -1,6 +1,6 @@
 # Target mappings (`mapping.jsonc`)
 
-Per-app **canonical → native** projection, versioned separately from theme packs.
+Per-app projection from theme semantics → native config keys. The file **`metadata.schema_version`** selects the table shape.
 
 ## Layout
 
@@ -13,7 +13,10 @@ targets/
 └── …
 ```
 
-Each file validates as **`specs/schemas/target-mapping-v1.schema.json`** after JSONC parse.
+- **Theme v3** → validate as **`specs/schemas/target-mapping-v2.schema.json`** after JSONC parse (`shim_to_native`).
+- **Theme v2** → validate as **`specs/schemas/target-mapping-v1.schema.json`** (`canonical_to_native`).
+
+First-party **`kitty`**, **`kvantum`**, **`albert`** files in this repo use **v2** (shims) and pair with **theme v3**.
 
 ## `CHROMAMANCER_TARGETS_DIR`
 
@@ -25,20 +28,28 @@ Each file validates as **`specs/schemas/target-mapping-v1.schema.json`** after J
 
 Implementations resolve **`targets/<target_id>/mapping.jsonc`** relative to that root.
 
-## File shape (v1)
+## File shape
 
-- **`metadata`:** `{ "schema_version": "1", "target_id": "kitty" }` (must match folder name).
-- **`canonical_to_native`:** maps **[canonical key](canonical-colors.md)** → **native key string** (adapter interprets; see per-target README notes in each `mapping.jsonc`).
+### Target mapping v2 (shims)
+
+- **`metadata`:** `{ "schema_version": "2", "target_id": "kitty" }` (must match folder name).
+- **`shim_to_native`:** maps **[shim id](../specs/shim-colors.md)** → **native key string**, or **array of strings** when one resolved shim color must populate multiple native keys (Albert). Native strings are adapter-defined (e.g. Kitty `background`, Kvantum `window.color`, Albert `palette.base`).
 - **`apply_quick` / `apply_nix`:** optional blobs for CLI defaults (e.g. Albert output paths).
+
+### Target mapping v1 (canonical)
+
+- **`metadata.schema_version`:** **`"1"`**
+- **`canonical_to_native`:** maps **canonical keys** (see [`specs/canonical-colors.md`](../specs/canonical-colors.md)) → native key string.
 
 ## Pipeline
 
-1. Load **`themes/<id>/theme.jsonc`** → validate **`theme-v1`** or **`theme-v2`**.
-2. If **v2:** resolve **`tokens`** + **`canonical_assign`** → canonical hex table.
-3. Load **`targets/<id>/mapping.jsonc`** → merge with adapter builtins → emit native config.
+1. Load **`themes/<id>/theme.jsonc`** → validate **`theme-v1`**, **`theme-v2`**, or **`theme-v3`**.
+2. **v3:** resolve **`tokens`** + **`shim_assign`** → shim hex table.
+3. **v2:** resolve **`tokens`** + **`canonical_assign`** → canonical hex table.
+4. Load **`targets/<id>/mapping.jsonc`** at the matching mapping schema version → merge with adapter builtins → emit native config.
 
 ## Adding a target
 
-1. Register id in **`target-mapping-v1.schema.json`**, [`logic-registry.md`](../specs/logic-registry.md), SPEC roadmap.
-2. Add canonical keys to [`canonical-colors.md`](../specs/canonical-colors.md) + **`theme-v2.schema.json`** enum.
-3. Add **`targets/<id>/mapping.jsonc`**.
+1. Register id in **`target-mapping-v1.schema.json`** and **`target-mapping-v2.schema.json`**, [`logic-registry.md`](../specs/logic-registry.md), SPEC roadmap.
+2. For **v3:** add shims to [`specs/shim-colors.md`](../specs/shim-colors.md) + **`theme-v3.schema.json`** enum as needed. For **v2:** add canonical keys to [`specs/canonical-colors.md`](../specs/canonical-colors.md) + **`theme-v2.schema.json`** enum.
+3. Add **`targets/<id>/mapping.jsonc`** (v1 and/or v2 as appropriate).

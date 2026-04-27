@@ -1,14 +1,14 @@
 {
-  // Theme v2 — copy to themes/<id>/theme.jsonc; set metadata.name = <id>.
-  // Validate with specs/schemas/theme-v2.schema.json (JSONC-aware).
+  // Theme v3 — copy to themes/<id>/theme.jsonc; set metadata.name = <id>.
+  // Validate with specs/schemas/theme-v3.schema.json (JSONC-aware).
   //
-  // tokens: arbitrary color names → #RRGGBBAA only.
-  // canonical_assign: maps stable keys (specs/canonical-colors.md) → token name or literal / "transparent".
-  // Per-target projection: targets/<kitty|kvantum|albert>/mapping.jsonc (+ CHROMAMANCER_TARGETS_DIR).
+  // tokens: arbitrary color names → #RRGGBBAA.
+  // shim_assign: shared roles (specs/shim-colors.md) → token / hex / "transparent".
+  // Targets: targets/<kitty|kvantum|albert>/mapping.jsonc (schema_version "2", shim_to_native).
   //
-  // v1 (Base16-only + in-file targets): theme.v1.example.jsonc (legacy).
+  // v2 canonical themes: theme.v2.example.jsonc. v1: theme.v1.legacy.jsonc.
   "metadata": {
-    "schema_version": "2",
+    "schema_version": "3",
     "name": "replace-with-pack-directory-name",
     "version": "0.1.0"
   },
@@ -18,31 +18,31 @@
     "foam": "#cdd6f4FF",
     "accent": "#89b4faFF"
   },
-  "canonical_assign": {
-    "terminal.background": "void",
-    "terminal.foreground": "foam",
-    "terminal.cursor": "accent",
-    "terminal.cursor_text": "void",
-    "terminal.color0": "void",
-    "terminal.color1": "void",
-    "terminal.color2": "void",
-    "terminal.color3": "void",
-    "terminal.color4": "accent",
-    "terminal.color5": "void",
-    "terminal.color6": "foam",
-    "terminal.color7": "foam",
-    "terminal.color8": "mist",
-    "terminal.color9": "void",
-    "terminal.color10": "void",
-    "terminal.color11": "void",
-    "terminal.color12": "accent",
-    "terminal.color13": "void",
-    "terminal.color14": "foam",
-    "terminal.color15": "foam",
-    "qt.kvantum.window": "void",
-    "qt.kvantum.base": "mist",
-    "qt.kvantum.text": "foam",
-    "qt.kvantum.highlight": "accent"
+  "shim_assign": {
+    "background": "void",
+    "foreground": "foam",
+    "cursor": "accent",
+    "cursor_text": "void",
+    "palette_0": "void",
+    "palette_1": "void",
+    "palette_2": "void",
+    "palette_3": "void",
+    "palette_4": "accent",
+    "palette_5": "void",
+    "palette_6": "foam",
+    "palette_7": "foam",
+    "palette_8": "mist",
+    "palette_9": "void",
+    "palette_10": "void",
+    "palette_11": "void",
+    "palette_12": "accent",
+    "palette_13": "void",
+    "palette_14": "foam",
+    "palette_15": "foam",
+    "window": "void",
+    "base": "mist",
+    "text": "foam",
+    "chrome_focus": "accent"
   },
   "fonts": {
     "ui": { "family": "Inter" },

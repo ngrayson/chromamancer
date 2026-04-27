@@ -4,14 +4,27 @@ Spec-driven desktop theming: live apply, Nix/HM, theme packs, multi-target (Kitt
 
 ## How we work (spec-driven)
 
-1. **Contracts live in** `specs/schemas/` — **theme:** [`theme-v1.schema.json`](schemas/theme-v1.schema.json) (legacy) or [`theme-v2.schema.json`](schemas/theme-v2.schema.json); **targets:** [`target-mapping-v1.schema.json`](schemas/target-mapping-v1.schema.json); plus [`specs/canonical-colors.md`](canonical-colors.md) and [`specs/logic-registry.md`](logic-registry.md).
-2. **Theme packs** — `themes/<theme-id>/theme.jsonc` (JSONC). **v1:** fixed Base16 `tokens` + optional embedded `targets`. **v2:** arbitrary `tokens`, **`canonical_assign`** → stable semantic keys; **no** embedded `targets`.
-3. **Target mappings** — `targets/<target-id>/mapping.jsonc`: **canonical → native** projection + optional `apply_*` defaults. Discovered via **`CHROMAMANCER_TARGETS_DIR`** (see [`targets/README.md`](../targets/README.md)).
+1. **Contracts live in** `specs/schemas/` — **theme:** [`theme-v1.schema.json`](schemas/theme-v1.schema.json) (legacy), [`theme-v2.schema.json`](schemas/theme-v2.schema.json) (canonical keys), or [`theme-v3.schema.json`](schemas/theme-v3.schema.json) (**preferred:** shims); **targets:** [`target-mapping-v1.schema.json`](schemas/target-mapping-v1.schema.json) (**canonical → native**) or [`target-mapping-v2.schema.json`](schemas/target-mapping-v2.schema.json) (**shim → native**); plus [`specs/shim-colors.md`](shim-colors.md), [`specs/canonical-colors.md`](canonical-colors.md) (v2 catalog), and [`specs/logic-registry.md`](logic-registry.md).
+2. **Theme packs** — `themes/<theme-id>/theme.jsonc` (JSONC). **v1:** fixed Base16 `tokens` + optional embedded `targets`. **v2:** arbitrary `tokens`, **`canonical_assign`** → per-stack canonical keys. **v3 (preferred):** **`shim_assign`** → shared semantic shims ([`shim-colors.md`](shim-colors.md)); **no** embedded `targets`.
+3. **Target mappings** — `targets/<target-id>/mapping.jsonc`: **v1:** **`canonical_to_native`** + optional `apply_*`; **v2:** **`shim_to_native`** (values may be string or string[] when one shim fans out). Discovered via **`CHROMAMANCER_TARGETS_DIR`** (see [`targets/README.md`](../targets/README.md)).
 4. **Builtin adapters** supply merge rules, **`apply-quick`** / **`apply-nix`** routing, and **`logic`** hooks (where used).
 5. **Apply model:** **`apply-quick`** vs Nix **`switch`**; see **Authoritative paths** below.
 6. **Bootstrap:** standalone CLI; no required in-repo HM module (`nix/modules/README.md`).
 
-## Theme format v2 (canonical)
+## Theme format v3 (preferred, shims)
+
+**Validate:** [`theme-v3.schema.json`](schemas/theme-v3.schema.json).
+
+| Part | Purpose |
+|------|---------|
+| **`metadata.schema_version`** | **`"3"`** |
+| **`tokens`** | Named swatches only; values **`#RRGGBBAA`**; names match `^[a-z][a-z0-9_-]*$`. |
+| **`shim_assign`** | Maps **shim ids** (enum in schema; catalog in [`shim-colors.md`](shim-colors.md)) → **token name**, **`#RRGGBB`/`#RRGGBBAA` literal**, or **`transparent`** where allowed. |
+| **`fonts`**, **`assets`** | Same as v1/v2. |
+
+**Pipeline:** resolve **`shim_assign`** using **`tokens`** → **shim color table** (hex / transparent). Load **`targets/<id>/mapping.jsonc`** with **`metadata.schema_version`: `"2"`** and **`shim_to_native`**, merge with adapter builtins, emit native configs.
+
+### Theme format v2 (canonical, legacy for new packs)
 
 **Validate:** [`theme-v2.schema.json`](schemas/theme-v2.schema.json).
 
@@ -22,13 +35,11 @@ Spec-driven desktop theming: live apply, Nix/HM, theme packs, multi-target (Kitt
 | **`canonical_assign`** | Maps **canonical keys** (enum in schema; catalog in [`canonical-colors.md`](canonical-colors.md)) → **token name**, **`#RRGGBB`/`#RRGGBBAA` literal**, or **`transparent`** (Albert borders). |
 | **`fonts`**, **`assets`** | Unchanged from v1 semantics. |
 
-**Pipeline:** resolve **`canonical_assign`** using **`tokens`** → **canonical color table** (hex / transparent). For each target, load **`targets/<id>/mapping.jsonc`**, merge with adapter builtins, emit native configs.
-
-**Themes do not embed** `targets.*`; projection and install defaults live under **`targets/`**.
+**Pipeline:** resolve **`canonical_assign`** using **`tokens`** → **canonical color table** (hex / transparent). For each target, load **`targets/<id>/mapping.jsonc`** with **`metadata.schema_version`: `"1"`** and **`canonical_to_native`**, merge with adapter builtins, emit native configs.
 
 ### Theme format v1 (legacy, Base16)
 
-**Validate:** [`theme-v1.schema.json`](schemas/theme-v1.schema.json). **`metadata.schema_version`** **`"1"`**. Fixed **`base00`–`base0F`** tokens; optional **`targets.<id>`** with `mappings`, `apply_quick`, `apply_nix`, `overrides`, `logic`. New work should use **v2 + `targets/`**; v1 remains until packs are migrated.
+**Validate:** [`theme-v1.schema.json`](schemas/theme-v1.schema.json). **`metadata.schema_version`** **`"1"`**. Fixed **`base00`–`base0F`** tokens; optional **`targets.<id>`** with `mappings`, `apply_quick`, `apply_nix`, `overrides`, `logic`. New work should use **v3 + `targets/`** (shim mappings); v2 + canonical mappings and v1 remain until packs are migrated.
 
 ### Discovery and CLI inputs
 
@@ -44,7 +55,7 @@ Implementations SHOULD error if paths resolve outside intended roots after canon
 
 **Theme v1** `propertyNames` / **target-mapping** `metadata.target_id`: `hyprland`, `kitty`, `gtk`, `qt`, `kvantum`, `quickshell`, `albert`.
 
-Adding a target requires: adapter code, SPEC roadmap row, **schema enum** updates (`target-mapping-v1`, **`theme-v2` canonical enum** if new semantic keys), [`canonical-colors.md`](canonical-colors.md), [`logic-registry.md`](logic-registry.md), and **`targets/<id>/mapping.jsonc`**.
+Adding a target requires: adapter code, SPEC roadmap row, **schema enum** updates (`target-mapping-v1` / **`target-mapping-v2`**, **`theme-v2` canonical enum** and/or **`theme-v3` shim enum** if new semantic keys), [`shim-colors.md`](shim-colors.md) / [`canonical-colors.md`](canonical-colors.md) as appropriate, [`logic-registry.md`](logic-registry.md), and **`targets/<id>/mapping.jsonc`**.
 
 ### Per-target object (theme v1 only)
 
@@ -68,7 +79,7 @@ For each target `T`, adapters maintain **`M_builtin`**.
 4. Render to native representation.
 5. Deep-merge **`overrides`**.
 
-Theme **v2** uses target **`mapping.jsonc`** + adapter code for projection instead of per-theme `mappings`.
+Theme **v2** and **v3** use repo **`targets/<id>/mapping.jsonc`** + adapter code for projection instead of per-theme `mappings`.
 
 ## Colors v1 appendix: Base16 token keys
 
@@ -93,15 +104,15 @@ Legacy **v1** requires **`base00`–`base0F`** with **`#RRGGBBAA`**. Semantics: 
 | `base0E` | magenta | secondary accent, keyword emphasis |
 | `base0F` | brown / deprecated | rare accents, legacy chrome |
 
-**v2:** authors may still *name* tokens `base00`… for compatibility, but the schema does not require them; semantic meaning comes from **`canonical_assign`**.
+**v2/v3:** authors may still *name* tokens `base00`… for compatibility; **v3** assigns **`palette_0`–`palette_15`** explicitly in **`shim_assign`**.
 
 ### Kitty `color0`–`color15` (reference)
 
-Default **base16-shell-style** ANSI mapping for tools that fill terminal slots from Base16 is documented in the v1 template history; **v2** assigns **`terminal.color0`–`terminal.color15`** explicitly in **`canonical_assign`**.
+Default **base16-shell-style** ANSI mapping for tools that fill terminal slots from Base16 is documented in the v1 template history; **v3** assigns **`palette_0`–`palette_15`** in **`shim_assign`**; **v2** uses **`terminal.color0`–`terminal.color15`** in **`canonical_assign`**.
 
 ## Metadata
 
-- **`metadata.schema_version`:** **`"1"`** (v1 theme) or **`"2"`** (v2 theme).
+- **`metadata.schema_version`:** **`"1"`** (v1 theme), **`"2"`** (v2 theme), or **`"3"`** (v3 theme).
 - **`metadata.name`:** kebab-case; MUST equal **`themes/<id>/`** folder when packed.
 
 ## Builtin adapters (summary)
@@ -183,7 +194,10 @@ Reproducible themes: **pack-relative assets**; pin **chromamancer** version.
 
 - [`specs/schemas/theme-v1.schema.json`](schemas/theme-v1.schema.json)
 - [`specs/schemas/theme-v2.schema.json`](schemas/theme-v2.schema.json)
+- [`specs/schemas/theme-v3.schema.json`](schemas/theme-v3.schema.json)
 - [`specs/schemas/target-mapping-v1.schema.json`](schemas/target-mapping-v1.schema.json)
+- [`specs/schemas/target-mapping-v2.schema.json`](schemas/target-mapping-v2.schema.json)
+- [`specs/shim-colors.md`](shim-colors.md)
 - [`specs/canonical-colors.md`](canonical-colors.md)
 - [`targets/README.md`](../targets/README.md)
 - [`specs/logic-registry.md`](logic-registry.md)

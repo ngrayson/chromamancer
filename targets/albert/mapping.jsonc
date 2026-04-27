@@ -1,38 +1,43 @@
 {
-  // Albert Widgets Box Model INI: canonical → INI key (section from canonical: albert.palette.* → [palette])
+  // Albert: shim → INI keys (section.key). Adapters emit [palette] / [window] from the prefix.
   "metadata": {
-    "schema_version": "1",
+    "schema_version": "2",
     "target_id": "albert",
-    "comment": "Native value = bare key within [palette] or [window]; adapter maps from canonical prefix."
+    "comment": "Native strings are section.key; array = same resolved color applied to each key."
   },
-  "canonical_to_native": {
-    "albert.palette.base": "base",
-    "albert.palette.text": "text",
-    "albert.palette.window": "window",
-    "albert.palette.window_text": "window_text",
-    "albert.palette.button": "button",
-    "albert.palette.button_text": "button_text",
-    "albert.palette.highlight": "highlight",
-    "albert.palette.highlight_text": "highlight_text",
-    "albert.palette.placeholder_text": "placeholder_text",
-    "albert.palette.link": "link",
-    "albert.palette.link_visited": "link_visited",
-    "albert.window.input_background_brush": "input_background_brush",
-    "albert.window.input_border_brush": "input_border_brush",
-    "albert.window.input_trigger_color": "input_trigger_color",
-    "albert.window.input_hint_color": "input_hint_color",
-    "albert.window.settings_button_color": "settings_button_color",
-    "albert.window.settings_button_highlight_color": "settings_button_highlight_color",
-    "albert.window.result_item_selection_background_brush": "result_item_selection_background_brush",
-    "albert.window.result_item_selection_border_brush": "result_item_selection_border_brush",
-    "albert.window.result_item_selection_text_color": "result_item_selection_text_color",
-    "albert.window.result_item_selection_subtext_color": "result_item_selection_subtext_color",
-    "albert.window.result_item_text_color": "result_item_text_color",
-    "albert.window.result_item_subtext_color": "result_item_subtext_color",
-    "albert.window.action_item_selection_background_brush": "action_item_selection_background_brush",
-    "albert.window.action_item_selection_border_brush": "action_item_selection_border_brush",
-    "albert.window.action_item_selection_text_color": "action_item_selection_text_color",
-    "albert.window.action_item_text_color": "action_item_text_color"
+  "shim_to_native": {
+    "base": ["palette.base", "window.input_background_brush"],
+    "text": [
+      "palette.text",
+      "window.result_item_text_color",
+      "window.action_item_text_color"
+    ],
+    "window": "palette.window",
+    "window_text": "palette.window_text",
+    "button": ["palette.button", "window.settings_button_color"],
+    "button_text": "palette.button_text",
+    "list_selection": [
+      "palette.highlight",
+      "window.input_border_brush",
+      "window.input_trigger_color",
+      "window.settings_button_highlight_color",
+      "window.result_item_selection_background_brush",
+      "window.action_item_selection_background_brush"
+    ],
+    "placeholder_text": ["palette.placeholder_text", "window.input_hint_color"],
+    "link": "palette.link",
+    "link_visited": "palette.link_visited",
+    "selection_border": [
+      "window.result_item_selection_border_brush",
+      "window.action_item_selection_border_brush"
+    ],
+    "list_selection_foreground": [
+      "palette.highlight_text",
+      "window.result_item_selection_text_color",
+      "window.action_item_selection_text_color"
+    ],
+    "list_selection_subtext": "window.result_item_selection_subtext_color",
+    "list_subtext": "window.result_item_subtext_color"
   },
   "apply_nix": {
     "themes_dir": ".local/share/albert/widgetsboxmodel/themes",
