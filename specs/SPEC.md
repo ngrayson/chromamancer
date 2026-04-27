@@ -6,44 +6,57 @@ Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kit
 
 1. **Contracts live in** `specs/schemas/`. Version them (`scheme-v1`, later `scheme-v2`) before adding generators or Nix glue.
 2. **Schemes are data** under `schemes/<name>/`. They must validate against the active schema (tooling TBD).
-3. **Targets** (Kitty, GTK, Qt, Quickshell, Albert, Hyprland decorations, etc.) map from the **fixed token core** below — no per-target ad hoc color names in v1.
+3. **Targets** map from the **Base16 core** (`base00`–`base0F`) and **global fonts** — no ad hoc color names in v1.
 4. **Iteration**: the Rust CLI under `crates/cli/` will eventually apply schemes quickly; **Nix / Home Manager** applies the same artifacts declaratively once a look is finalized.
 
-## Canonical tokens (v1)
+## Colors (v1): Base16 canonical names
 
-**Encoding:** every token value is **`#RRGGBBAA`** (hash + eight hex digits). **No `#RRGGBB` shorthand** in v1 — use explicit `FF` for fully opaque (e.g. `#c0caf5FF`).
+**Why Base16:** Sixteen stable keys match terminal/editor ecosystems and give one row of swatches for generators to map onto **Qt `QPalette` roles**, **Kvantum**-style widgets, GTK, and Wayland compositor colors.
 
-**Core:** exactly these keys, all required on every scheme instance (see `specs/schemas/scheme-v1.schema.json`):
+**Encoding:** every `tokens.*` value is **`#RRGGBBAA`** (no `#RRGGBB` shorthand in v1).
 
-| Token | Meaning |
-|-------|---------|
-| `bg0` | Deepest surface (e.g. default background) |
-| `bg1` | Raised surface (e.g. panels, inactive tabs) |
-| `bg2` | Further elevated (e.g. popovers, highlights) |
-| `fg0` | Primary foreground |
-| `fg1` | Secondary / emphasized foreground |
-| `fg_muted` | De-emphasized text |
-| `border` | Dividers, faint UI chrome |
-| `accent` | Primary accent fill |
-| `accent_fg` | Text/icons on top of `accent` |
-| `error` | Error / destructive emphasis |
-| `warning` | Warning emphasis |
-| `success` | Success emphasis |
-| `selection_bg` | Selection / list highlight background |
-| `selection_fg` | Text/icons on `selection_bg` |
+**Keys:** exactly `base00` … `base0F`, all required. Meanings follow the [Base16 styling guide](https://github.com/chriskempson/base16/blob/main/styling.md). The table below adds a **Qt / UI-oriented hint** so implementers know *typical* mapping targets (not exhaustive—Kvantum SVG themes may derive extra stops from these).
 
-Naming or semantics for any key can be revised while we still call this **scheme v1**; if we remove/rename keys, bump to **v2** in schema filename and `$id`.
+| Key | Base16 role (short) | Typical Qt / Kvantum / UI use |
+|-----|---------------------|-------------------------------|
+| `base00` | default background | `QPalette::Window`, main Kvantum window/base fill |
+| `base01` | lighter background | `AlternateBase`, status bars, inactive tabs |
+| `base02` | selection background | `Highlight` background-tones, list selection plane |
+| `base03` | subtle / comments | borders, disabled, placeholder tone |
+| `base04` | dark foreground | secondary `WindowText`, dim labels |
+| `base05` | default foreground | `QPalette::Text`, primary content |
+| `base06` | light foreground | emphasized labels, bright `WindowText` |
+| `base07` | light background | popovers, tooltips base, elevated panels |
+| `base08` | red / diff delete | destructive, error accents |
+| `base09` | orange | constants / URIs emphasis |
+| `base0A` | yellow | warning, search highlight, caution |
+| `base0B` | green / diff add | success, positive indicators |
+| `base0C` | cyan | links, info, quotes in syntax |
+| `base0D` | blue | `QPalette::Highlight` / focus, links, “accent” in many themes |
+| `base0E` | magenta | secondary accent, keyword emphasis |
+| `base0F` | brown / deprecated | rare accents, legacy chrome |
+
+Generators **may** derive non-palette decoration (e.g. Hyprland border gradients, extra Kvantum SVG shades) from these sixteen values using documented formulas—those derivatives are **not** new canonical keys in v1.
+
+## Fonts (v1): global `fonts`
+
+Required object with two faces:
+
+- **`fonts.ui`** — proportional UI (`family`, `size_pt`)
+- **`fonts.mono`** — monospace (`family`, `size_pt`)
+
+`family` is a **Linux-usable font name** (typically a Fontconfig family string). `size_pt` is a positive point size; Kitty and Qt may interpret rounding differently—implementations document any clamping.
 
 ## Targets (initial wish list)
 
 | Target        | Notes |
 |---------------|--------|
-| Kitty         | colors, fonts |
-| GTK           | theme, accent |
-| Qt            | `qt5ct` / `qt6ct` / platform theme |
+| Kitty         | Base16 → terminal 16/256/truecolor; `fonts.mono` |
+| GTK           | Map palette from Base16; `fonts.ui` where applicable |
+| Qt / Kvantum  | `QPalette` / Kvantum generation from Base16 + `fonts.ui` |
 | Quickshell    | bar + lock screen |
-| Albert        | theme / QSS |
-| Hyprland      | `general:col.*`, decoration, misc |
+| Albert        | theme / QSS from palette |
+| Hyprland      | `general:col.*`, decoration from Base16 mapping |
 
 ## Assets
 
@@ -55,6 +68,6 @@ Do **not** store secrets in scheme files. Treat schemes as **public** configurat
 
 ## See also
 
-- `specs/schemas/scheme-v1.schema.json` — v1 JSON Schema (fixed token core, `#RRGGBBAA`).
+- `specs/schemas/scheme-v1.schema.json` — v1 JSON Schema (Base16 + `#RRGGBBAA` + fonts).
 - `schemes/README.md` — layout for scheme packs.
 - `ARCHITECTURE.md` — repository layout and data flow.

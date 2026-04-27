@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://localhost/chromamancer/scheme-v1.schema.json",
   "title": "chromamancer scheme v1",
-  "description": "Portable desktop color + asset scheme. v1: fixed semantic token core; every color is #RRGGBBAA (alpha required, including opaque as FF).",
+  "description": "Portable desktop color + asset scheme. v1: Base16 names (base00–base0F), #RRGGBBAA colors, global fonts (ui + mono).",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -24,40 +24,54 @@
     },
     "tokens": {
       "type": "object",
-      "description": "Fixed semantic palette. All keys required; values are #RRGGBBAA only.",
+      "description": "Canonical Base16 palette. Keys are base00..base0F; values #RRGGBBAA. Generators map these to terminals, QPalette/Kvantum, GTK, Hyprland, etc.",
       "additionalProperties": false,
       "properties": {
-        "bg0": { "$ref": "#/$defs/RgbaHex" },
-        "bg1": { "$ref": "#/$defs/RgbaHex" },
-        "bg2": { "$ref": "#/$defs/RgbaHex" },
-        "fg0": { "$ref": "#/$defs/RgbaHex" },
-        "fg1": { "$ref": "#/$defs/RgbaHex" },
-        "fg_muted": { "$ref": "#/$defs/RgbaHex" },
-        "border": { "$ref": "#/$defs/RgbaHex" },
-        "accent": { "$ref": "#/$defs/RgbaHex" },
-        "accent_fg": { "$ref": "#/$defs/RgbaHex" },
-        "error": { "$ref": "#/$defs/RgbaHex" },
-        "warning": { "$ref": "#/$defs/RgbaHex" },
-        "success": { "$ref": "#/$defs/RgbaHex" },
-        "selection_bg": { "$ref": "#/$defs/RgbaHex" },
-        "selection_fg": { "$ref": "#/$defs/RgbaHex" }
+        "base00": { "$ref": "#/$defs/RgbaHex" },
+        "base01": { "$ref": "#/$defs/RgbaHex" },
+        "base02": { "$ref": "#/$defs/RgbaHex" },
+        "base03": { "$ref": "#/$defs/RgbaHex" },
+        "base04": { "$ref": "#/$defs/RgbaHex" },
+        "base05": { "$ref": "#/$defs/RgbaHex" },
+        "base06": { "$ref": "#/$defs/RgbaHex" },
+        "base07": { "$ref": "#/$defs/RgbaHex" },
+        "base08": { "$ref": "#/$defs/RgbaHex" },
+        "base09": { "$ref": "#/$defs/RgbaHex" },
+        "base0A": { "$ref": "#/$defs/RgbaHex" },
+        "base0B": { "$ref": "#/$defs/RgbaHex" },
+        "base0C": { "$ref": "#/$defs/RgbaHex" },
+        "base0D": { "$ref": "#/$defs/RgbaHex" },
+        "base0E": { "$ref": "#/$defs/RgbaHex" },
+        "base0F": { "$ref": "#/$defs/RgbaHex" }
       },
       "required": [
-        "bg0",
-        "bg1",
-        "bg2",
-        "fg0",
-        "fg1",
-        "fg_muted",
-        "border",
-        "accent",
-        "accent_fg",
-        "error",
-        "warning",
-        "success",
-        "selection_bg",
-        "selection_fg"
+        "base00",
+        "base01",
+        "base02",
+        "base03",
+        "base04",
+        "base05",
+        "base06",
+        "base07",
+        "base08",
+        "base09",
+        "base0A",
+        "base0B",
+        "base0C",
+        "base0D",
+        "base0E",
+        "base0F"
       ]
+    },
+    "fonts": {
+      "type": "object",
+      "description": "Global typographic defaults for targets that accept a family + size (Kitty, Qt-style UI, etc.).",
+      "additionalProperties": false,
+      "properties": {
+        "ui": { "$ref": "#/$defs/FontFace" },
+        "mono": { "$ref": "#/$defs/FontFace" }
+      },
+      "required": ["ui", "mono"]
     },
     "assets": {
       "type": "object",
@@ -74,12 +88,30 @@
       "additionalProperties": true
     }
   },
-  "required": ["metadata", "tokens"],
+  "required": ["metadata", "tokens", "fonts"],
   "$defs": {
     "RgbaHex": {
       "type": "string",
       "pattern": "^#[0-9A-Fa-f]{8}$",
       "description": "RGB + alpha, eight hex digits after #. Opaque colors use FF (e.g. #1a1b26FF)."
+    },
+    "FontFace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "size_pt"],
+      "properties": {
+        "family": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Font family as consumed on Linux (e.g. Fontconfig family name). Targets may normalize."
+        },
+        "size_pt": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 128,
+          "description": "Point size for UI or terminal (interpretation per target)."
+        }
+      }
     }
   }
 }

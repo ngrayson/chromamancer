@@ -42,12 +42,13 @@ specs/schemas  ──validate──►  schemes/*     ──read──►  CLI a
 
 - **Rust** — CLI (`ratatui` placeholder UI, same baseline as Stellarium cli-tool template).
 - **Nix** — `nix develop` / future modules.
-- **JSON Schema** — scheme contract draft in `specs/schemas/scheme-v1.schema.json`.
+- **JSON Schema** — draft 2020-12 for `specs/schemas/scheme-v1.schema.json` (Base16 + global fonts).
 
 ## Key decisions
 
 - **Workspace layout** — generic path `crates/cli` keeps the Stellarium template independent of project name; the binary name remains `chromamancer`.
 - **Spec before codegen** — Nix and Rust generators should target **versioned** schema files to avoid drift.
+- **v1 palette** — canonical keys are **Base16** (`base00`–`base0F`) with **`#RRGGBBAA`**, plus required **global fonts** (`fonts.ui`, `fonts.mono`).
 
 ## Future considerations
 
