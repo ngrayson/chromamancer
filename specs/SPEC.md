@@ -7,7 +7,7 @@ Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kit
 1. **Contracts live in** `specs/schemas/`. Version them (`scheme-v1`, later `scheme-v2`) before adding generators or Nix glue.
 2. **Schemes are data** under `schemes/<name>/`. They must validate against the active schema (tooling TBD).
 3. **`scheme.json` is portable look data** — Base16 `tokens`, `fonts`, `assets`. **Default mapping** from our names to each app’s config (and transforms like derived borders) lives in **target adapters** inside chromamancer; you add targets one adapter at a time.
-4. **Iteration**: the Rust CLI applies schemes via adapters; **Nix / Home Manager** uses the same scheme + adapter logic (shared or generated) declaratively once a look is finalized.
+4. **Iteration vs system of record:** see **Apply model** below — CLI for fast targets during dev; **NixOS / Home Manager rebuild is authoritative** and replaces all generated outputs.
 
 ## Colors (v1): Base16 canonical names
 
@@ -48,16 +48,29 @@ Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kit
 
 Default Base16 → Qt/Kvantum-style roles remains documented in the **Colors** table above; each adapter’s concrete key list will be spelled out in adapter-specific docs or tests as we implement.
 
+## Apply model: fast iteration vs Nix
+
+**Two classes of target (per adapter):**
+
+1. **Fast-iterative** — chromamancer **CLI** can regenerate outputs under the live config tree and, where the app supports it, **reload** so you can tune a look quickly. Typical for file-based configs that accept included fragments (e.g. Hyprland, Kitty); exact list is per-adapter documentation.
+2. **Rebuild-only** — outputs are only sensible to apply as part of **NixOS / Home Manager** activation (no hot reload, or generation is tied to store paths / system state). Iteration loop is **edit scheme → rebuild**, not `chromamancer apply`.
+
+**Authoritative state:** running **`nixos-rebuild`** / **`home-manager switch`** (or equivalent) **regenerates and installs chromamancer artifacts for every target**, including fast-iterative ones. That **overwrites** any files the CLI had written for those targets. Treat **CLI apply as dev-time only**; anything you want to keep must live in **Nix-expressed** scheme inputs and module config **before** you rely on a reboot-stable system.
+
+**Implication:** after a successful rebuild, on-disk theme files should match the **Nix closure**, not stale iterative tweaks unless your Nix config references the same dev paths (discouraged for production).
+
 ## Supported targets (adapter roadmap)
 
-| Target        | Role of adapter |
-|---------------|-----------------|
-| Kitty         | Map Base16 → terminal colors + `fonts.mono.family`; optional overrides |
-| GTK           | Palette / theme fragments from Base16 + `fonts.ui.family` |
-| Qt / Kvantum  | `QPalette` / Kvantum-related output + `fonts.ui.family` |
-| Quickshell    | Bar / lock theming from tokens + assets |
-| Albert        | QSS / theme from palette |
-| Hyprland      | `general:col.*`, decoration-related keys from mapping + logic |
+| Target        | Role of adapter | Typical iteration class |
+|---------------|-----------------|-------------------------|
+| Kitty         | Map Base16 → terminal colors + `fonts.mono.family`; optional overrides | usually **fast** |
+| GTK           | Palette / theme fragments from Base16 + `fonts.ui.family` | often **rebuild-only** |
+| Qt / Kvantum  | `QPalette` / Kvantum-related output + `fonts.ui.family` | often **rebuild-only** |
+| Quickshell    | Bar / lock theming from tokens + assets | **TBD** per setup |
+| Albert        | QSS / theme from palette | **TBD** |
+| Hyprland      | `general:col.*`, decoration-related keys from mapping + logic | usually **fast** |
+
+Exact **fast vs rebuild-only** is declared per adapter when implemented; the table is planning guidance only.
 
 ## Fonts (v1): global `fonts`
 
