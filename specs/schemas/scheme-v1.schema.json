@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://localhost/chromamancer/scheme-v1.schema.json",
+  "title": "chromamancer scheme (v1 draft)",
+  "description": "Draft contract for a portable desktop color/asset scheme. Fields will evolve; keep version in metadata.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string" },
+        "version": {
+          "type": "string",
+          "description": "Scheme format version (e.g. 1)"
+        },
+        "author": { "type": "string" }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "description": "Canonical semantic colors (e.g. bg0, fg0, accent). Target mappings reference these keys.",
+      "additionalProperties": {
+        "type": "string",
+        "description": "Color as #RRGGBB or similar"
+      }
+    },
+    "assets": {
+      "type": "object",
+      "description": "Images and paths relative to the scheme directory or explicit URIs",
+      "additionalProperties": true,
+      "properties": {
+        "wallpaper": { "type": "string" },
+        "avatar": { "type": "string" }
+      }
+    },
+    "targets": {
+      "type": "object",
+      "description": "Optional per-target overrides or binding maps",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "HexColor": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$"
+    }
+  }
+}

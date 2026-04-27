@@ -1,0 +1,41 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# Temporary files
+*.tmp
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build outputs (language-specific templates will add more)
+dist/
+build/
+target/
+out/
+
+# Dependencies (language-specific templates will add more)
+node_modules/
+vendor/
+
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# IDE
+*.iml
+.project
+.classpath
+.settings/

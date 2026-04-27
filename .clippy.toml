@@ -1,0 +1,11 @@
+# Clippy configuration
+deny_warnings = false
+
+[clippy::cognitive_complexity]
+max = 30
+
+[clippy::too_many_arguments]
+max = 7
+
+[clippy::type_complexity]
+max = 25
