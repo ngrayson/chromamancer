@@ -8,7 +8,7 @@ chromamancer is organized as a **Rust workspace**, **specs**, **scheme packs**, 
 
 ## Pillars
 
-1. **Fast iteration** — CLI applies **fast-iterative** targets (fragment regen + reload where supported); ephemeral until Nix captures the same inputs.
+1. **Fast iteration** — **`chromamancer apply-quick`** writes to fixed **XDG-style** paths for reload-capable targets; **`chromamancer apply-nix`** writes to a **configured** directory for Nix/HM to consume (see `specs/SPEC.md`, **CLI: apply modes**).
 2. **Nix (optional)** — `nix/flake.nix` provides a **dev shell** for development; **first-party** Home Manager / NixOS modules are **not** part of the bootstrap. Users may invoke the CLI from their **own** Nix config later; when they install the same outputs via Nix, **rebuild overwrites** those files (see SPEC).
 3. **Schematic color schemes** — `specs/schemas/` defines validated scheme files; `specs/SPEC.md` is the human index.
 4. **Scheme creation** — authors add directories under `schemes/` conforming to the active schema.

@@ -74,6 +74,19 @@ Default Base16 → Qt/Kvantum-style roles remains documented in the **Colors** t
 
 **Implication:** after a rebuild that manages those paths, on-disk theme files should match **what Nix installed**, not stale CLI tweaks—unless paths are intentionally disjoint (CLI → dev copy, Nix → production copy).
 
+## CLI: apply modes (bootstrap)
+
+The tool exposes **two** apply entry points so fast iteration and Nix-oriented generation stay explicit:
+
+| Command | Purpose |
+|---------|---------|
+| **`chromamancer apply-quick`** | Writes generated artifacts to **fixed runtime paths** under normal Linux conventions (e.g. **`$XDG_CONFIG_HOME`/…** per target). Intended for **immediate feedback** and reload-capable targets. Exact paths are **documented per adapter** (e.g. Hyprland fragment location, Kitty include path). |
+| **`chromamancer apply-nix`** | Writes the **same** generated artifacts to a **directory tree meant for your Nix / Home Manager config** to read (e.g. a `generated/` folder inside your dotfiles flake, or whatever paths your `home.file` / imports expect). **Output root** is **user-configured** (required **`--out`** path and/or **`CHROMAMANCER_NIX_OUT`** env—exact flag names TBD in implementation) so it matches your repository layout; chromamancer does not guess your flake root. |
+
+Both commands use the **same** scheme + adapters + merge rules; only the **destination root layout** differs. Run **`apply-nix`** before committing / running **`nixos-rebuild`** / **`home-manager switch`** when your Nix config tracks those files. **`apply-quick`** is for editing the live session without touching the Nix tree.
+
+Shared flags (conceptual): scheme path / pack id, target selection, dry-run—specified when implementing.
+
 ## Supported targets (adapter roadmap)
 
 | Target        | Role of adapter | Typical iteration class |
