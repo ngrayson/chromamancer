@@ -7,6 +7,7 @@ Each **theme** is **`themes/<theme-id>/`** (e.g. `themes/nord-forest/`). **`meta
 - **`theme.jsonc`** (required) — **JSONC**. Validate parsed JSON against [`specs/schemas/theme-v1.schema.json`](../specs/schemas/theme-v1.schema.json) (requires **`metadata.schema_version`: `"1"`**).
 - **`assets/`** — media referenced from `theme.jsonc` (paths usually relative to pack root).
 - **`_template/theme.example.jsonc`** — starting point; copy to **`theme.jsonc`** in a new pack.
+- **`izar/`** — example pack (Izar palette: Kitty/Kvantum mappings + Albert `apply_nix` stub).
 
 ## Discovery (normative)
 

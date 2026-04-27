@@ -1,5 +1,12 @@
 {
-  // Example theme — copy to theme.jsonc and edit. Validate with theme-v1.schema.json (parse JSONC first).
+  // Example theme — copy to `themes/<id>/theme.jsonc` and set `metadata.name` to `<id>`.
+  // Validate with theme-v1.schema.json after stripping JSONC comments (or use a JSONC-aware validator).
+  //
+  // Mappings: values are usually token names ("base05") pointing at `tokens`; adapters resolve to #RRGGBBAA
+  // (emitters may drop alpha for formats like Kitty #RRGGBB). Literal "#RRGGBBAA" overrides are allowed.
+  //
+  // Kitty `color0`–`color15`: default here follows base16-shell ANSI mapping (see SPEC.md — Mapping shapes).
+  // Kvantum: `GeneralColors` mirrors `[GeneralColors]` in `.kvconfig`; full themes still need .svg + rest of .kvconfig.
   "metadata": {
     "schema_version": "1",
     "name": "replace-with-pack-directory-name",
@@ -26,5 +33,60 @@
   "fonts": {
     "ui": { "family": "Inter" },
     "mono": { "family": "JetBrainsMono Nerd Font" }
+  },
+  "targets": {
+    "kitty": {
+      "mappings": {
+        "background": "base00",
+        "foreground": "base05",
+        "selection_background": "base02",
+        "selection_foreground": "base05",
+        "cursor": "base0C",
+        "cursor_text_color": "base00",
+        "url_color": "base0C",
+        "color0": "base00",
+        "color1": "base08",
+        "color2": "base0B",
+        "color3": "base0A",
+        "color4": "base0D",
+        "color5": "base0E",
+        "color6": "base0C",
+        "color7": "base05",
+        "color8": "base03",
+        "color9": "base08",
+        "color10": "base0B",
+        "color11": "base0A",
+        "color12": "base0D",
+        "color13": "base0E",
+        "color14": "base0C",
+        "color15": "base07"
+      }
+    },
+    "kvantum": {
+      "mappings": {
+        "GeneralColors": {
+          "window.color": "base00",
+          "base.color": "base01",
+          "alt.base.color": "base02",
+          "button.color": "base02",
+          "light.color": "base01",
+          "mid.light.color": "base01",
+          "dark.color": "base03",
+          "mid.color": "base02",
+          "highlight.color": "base0D",
+          "inactive.highlight.color": "base03",
+          "text.color": "base05",
+          "window.text.color": "base05",
+          "button.text.color": "base05",
+          "inactive.text.color": "base04",
+          "disabled.text.color": "base03",
+          "tooltip.base.color": "base01",
+          "tooltip.text.color": "base05",
+          "highlight.text.color": "base07",
+          "link.color": "base0D",
+          "link.visited.color": "base0E"
+        }
+      }
+    }
   }
 }

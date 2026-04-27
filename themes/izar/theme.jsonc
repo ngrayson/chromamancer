@@ -1,0 +1,92 @@
+{
+  // Izar — pack id / metadata.name: "izar". Palette from Kitty (Debian/non-Omarchy); Base16 slots fill gaps.
+  // ANSI color2 in your terminal is cyan (non–base16-shell); mappings below match your color0–color15 table.
+  "metadata": {
+    "schema_version": "1",
+    "name": "izar",
+    "version": "0.1.0"
+  },
+  "tokens": {
+    "base00": "#050c08FF",
+    "base01": "#0e1814FF",
+    "base02": "#152520FF",
+    "base03": "#4d5f55FF",
+    "base04": "#6d8a82FF",
+    "base05": "#A0BDB8FF",
+    "base06": "#c5ddd8FF",
+    "base07": "#6fa868FF",
+    "base08": "#69537cFF",
+    "base09": "#8d6565FF",
+    "base0A": "#c9a66cFF",
+    "base0B": "#08af8bFF",
+    "base0C": "#32d8bcFF",
+    "base0D": "#58709bFF",
+    "base0E": "#7a6590FF",
+    "base0F": "#5c4a42FF"
+  },
+  "fonts": {
+    "ui": { "family": "IosevkaTermSlab NFM" },
+    "mono": { "family": "IosevkaTermSlab NFM" }
+  },
+  "targets": {
+    "kitty": {
+      "mappings": {
+        "background": "base00",
+        "foreground": "base05",
+        "selection_background": "base0C",
+        "selection_foreground": "#02000CFF",
+        "cursor": "base0C",
+        "cursor_text_color": "#02000CFF",
+        "url_color": "base0C",
+        "color0": "base00",
+        "color1": "base08",
+        "color2": "base0C",
+        "color3": "base09",
+        "color4": "base0B",
+        "color5": "base0D",
+        "color6": "base05",
+        "color7": "base07",
+        "color8": "base03",
+        "color9": "base08",
+        "color10": "base0C",
+        "color11": "base09",
+        "color12": "base0B",
+        "color13": "base0D",
+        "color14": "base05",
+        "color15": "base07"
+      }
+    },
+    "kvantum": {
+      "mappings": {
+        "GeneralColors": {
+          "window.color": "base00",
+          "base.color": "base01",
+          "alt.base.color": "base02",
+          "button.color": "base02",
+          "light.color": "base01",
+          "mid.light.color": "base01",
+          "dark.color": "base03",
+          "mid.color": "base02",
+          "highlight.color": "base0D",
+          "inactive.highlight.color": "base03",
+          "text.color": "base05",
+          "window.text.color": "base05",
+          "button.text.color": "base05",
+          "inactive.text.color": "base04",
+          "disabled.text.color": "base03",
+          "tooltip.base.color": "base01",
+          "tooltip.text.color": "base05",
+          "highlight.text.color": "base05",
+          "link.color": "base0C",
+          "link.visited.color": "base0E"
+        }
+      }
+    },
+    "albert": {
+      "apply_nix": {
+        "frontend": "widgetsboxmodel-ng",
+        "theme_file": "Izar.ini"
+      }
+    }
+  }
+}
