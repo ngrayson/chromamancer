@@ -1,28 +1,28 @@
 {
-  // Izar — user palette (10 swatches) mapped to Base16; order in comment is source order.
-  // Source: #05042f #060c48 #334995 #6aa0ba #a7ceb1 #c8f7d2 #d9d2e2 #a07b9c #402d4d #37315a
+  // Izar — 10 user swatches (source order) mapped to Base16.
+  // Source: #DCF5E1 #8CCCA4 #6ABAB5 #405495 #202661 #010212 #0B0A1C #302947 #A481CC #D7CADC
   "metadata": {
     "schema_version": "1",
     "name": "izar",
     "version": "0.1.0"
   },
   "tokens": {
-    "base00": "#05042fFF",
-    "base01": "#060c48FF",
-    "base02": "#37315aFF",
-    "base03": "#402d4dFF",
-    "base04": "#334995FF",
-    "base05": "#d9d2e2FF",
-    "base06": "#c8f7d2FF",
-    "base07": "#c8f7d2FF",
-    "base08": "#a07b9cFF",
-    "base09": "#6aa0baFF",
-    "base0A": "#a7ceb1FF",
-    "base0B": "#a7ceb1FF",
-    "base0C": "#6aa0baFF",
-    "base0D": "#334995FF",
-    "base0E": "#a07b9cFF",
-    "base0F": "#402d4dFF"
+    "base00": "#010212FF",
+    "base01": "#0B0A1CFF",
+    "base02": "#202661FF",
+    "base03": "#302947FF",
+    "base04": "#405495FF",
+    "base05": "#D7CADCFF",
+    "base06": "#DCF5E1FF",
+    "base07": "#DCF5E1FF",
+    "base08": "#A481CCFF",
+    "base09": "#6ABAB5FF",
+    "base0A": "#8CCCA4FF",
+    "base0B": "#8CCCA4FF",
+    "base0C": "#6ABAB5FF",
+    "base0D": "#405495FF",
+    "base0E": "#A481CCFF",
+    "base0F": "#302947FF"
   },
   "fonts": {
     "ui": { "family": "IosevkaTermSlab NFM" },
@@ -34,9 +34,9 @@
         "background": "base00",
         "foreground": "base05",
         "selection_background": "base0C",
-        "selection_foreground": "#05042fFF",
+        "selection_foreground": "base00",
         "cursor": "base0C",
-        "cursor_text_color": "#05042fFF",
+        "cursor_text_color": "base00",
         "url_color": "base0C",
         "color0": "base00",
         "color1": "base08",
@@ -83,6 +83,41 @@
       }
     },
     "albert": {
+      // Keys mirror Albert Widgets Box Model INI: [palette] and [window] (see Theme.ini.template).
+      // Values: token names or literals (#RRGGBBAA, "transparent", brush syntax later).
+      "mappings": {
+        "palette": {
+          "base": "base01",
+          "text": "base05",
+          "window": "base00",
+          "window_text": "base05",
+          "button": "base02",
+          "button_text": "base05",
+          "highlight": "base0C",
+          "highlight_text": "base00",
+          "placeholder_text": "base03",
+          "link": "base0C",
+          "link_visited": "base0E"
+        },
+        "window": {
+          "input_background_brush": "base01",
+          "input_border_brush": "base0C",
+          "input_trigger_color": "base0C",
+          "input_hint_color": "base03",
+          "settings_button_color": "base02",
+          "settings_button_highlight_color": "base0C",
+          "result_item_selection_background_brush": "base0C",
+          "result_item_selection_border_brush": "transparent",
+          "result_item_selection_text_color": "base00",
+          "result_item_selection_subtext_color": "base01",
+          "result_item_text_color": "base05",
+          "result_item_subtext_color": "base0C",
+          "action_item_selection_background_brush": "base0C",
+          "action_item_selection_border_brush": "transparent",
+          "action_item_selection_text_color": "base00",
+          "action_item_text_color": "base05"
+        }
+      },
       "apply_nix": {
         "themes_dir": ".local/share/albert/widgetsboxmodel/themes",
         "theme_file": "Izar.ini"
