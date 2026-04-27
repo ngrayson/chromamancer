@@ -4,7 +4,7 @@ Each **scheme** is a directory under `schemes/<scheme-id>/` (for example `scheme
 
 ## Layout (conventional)
 
-- `scheme.json` or `scheme.yaml` — **instance** of the format described in `specs/schemas/` (v1: Base16 `tokens`, required `fonts`, `#RRGGBBAA` colors).
+- `scheme.json` or `scheme.yaml` — **instance** of the format described in `specs/schemas/` (v1: Base16 `tokens`, required `fonts` families only—no sizes, `#RRGGBBAA` colors).
 - `assets/` — wallpapers, user photo, icons, or other media referenced by the scheme file.
 
 ## Relationship to specs

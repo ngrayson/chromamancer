@@ -40,20 +40,22 @@ Generators **may** derive non-palette decoration (e.g. Hyprland border gradients
 
 ## Fonts (v1): global `fonts`
 
-Required object with two faces:
+The scheme carries **which typefaces** belong to the look, not **how big** they are—font sizes stay in Nix/Home Manager options, per-target configs (e.g. Kitty), or personal prefs so DPI and ergonomics do not fight the palette.
 
-- **`fonts.ui`** — proportional UI (`family`, `size_pt`)
-- **`fonts.mono`** — monospace (`family`, `size_pt`)
+Required:
 
-`family` is a **Linux-usable font name** (typically a Fontconfig family string). `size_pt` is a positive point size; Kitty and Qt may interpret rounding differently—implementations document any clamping.
+- **`fonts.ui.family`** — proportional UI face (GTK, Qt/Kvantum, shell UI text where applicable).
+- **`fonts.mono.family`** — monospace face (terminal, code-ish UI).
+
+Each is a **Linux-usable font family string** (usually a Fontconfig family name). If you truly use one face everywhere, the two `family` values may be identical—that is fine.
 
 ## Targets (initial wish list)
 
 | Target        | Notes |
 |---------------|--------|
-| Kitty         | Base16 → terminal 16/256/truecolor; `fonts.mono` |
-| GTK           | Map palette from Base16; `fonts.ui` where applicable |
-| Qt / Kvantum  | `QPalette` / Kvantum generation from Base16 + `fonts.ui` |
+| Kitty         | Base16 → terminal colors; `fonts.mono.family` (sizes in Kitty config / HM) |
+| GTK           | Map palette from Base16; `fonts.ui.family` where applicable |
+| Qt / Kvantum  | `QPalette` / Kvantum from Base16 + `fonts.ui.family` |
 | Quickshell    | bar + lock screen |
 | Albert        | theme / QSS from palette |
 | Hyprland      | `general:col.*`, decoration from Base16 mapping |

@@ -65,11 +65,11 @@
     },
     "fonts": {
       "type": "object",
-      "description": "Global typographic defaults for targets that accept a family + size (Kitty, Qt-style UI, etc.).",
+      "description": "Global font *family* names only. Sizes and weights belong in Home Manager, target configs, or user preferences—not in the scheme.",
       "additionalProperties": false,
       "properties": {
-        "ui": { "$ref": "#/$defs/FontFace" },
-        "mono": { "$ref": "#/$defs/FontFace" }
+        "ui": { "$ref": "#/$defs/FontFamily" },
+        "mono": { "$ref": "#/$defs/FontFamily" }
       },
       "required": ["ui", "mono"]
     },
@@ -95,21 +95,15 @@
       "pattern": "^#[0-9A-Fa-f]{8}$",
       "description": "RGB + alpha, eight hex digits after #. Opaque colors use FF (e.g. #1a1b26FF)."
     },
-    "FontFace": {
+    "FontFamily": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["family", "size_pt"],
+      "required": ["family"],
       "properties": {
         "family": {
           "type": "string",
           "minLength": 1,
           "description": "Font family as consumed on Linux (e.g. Fontconfig family name). Targets may normalize."
-        },
-        "size_pt": {
-          "type": "number",
-          "exclusiveMinimum": 0,
-          "maximum": 128,
-          "description": "Point size for UI or terminal (interpretation per target)."
         }
       }
     }
