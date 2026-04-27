@@ -4,7 +4,7 @@ Each **scheme** is a directory under `schemes/<scheme-id>/` (for example `scheme
 
 ## Layout (conventional)
 
-- **`scheme.json`** (required at pack root) — **JSON with comments (JSONC)**: `//` and `/* */` allowed; plain JSON is fine. After parsing, the value must match `specs/schemas/scheme-v1.schema.json` (Base16 `tokens`, required `fonts` families—no sizes, `#RRGGBBAA` colors). See **Scheme pack file (v1)** in `specs/SPEC.md`.
+- **`scheme.json`** (required at pack root) — **JSONC**. After parsing: `metadata`, `tokens` (Base16), `fonts`, optional `assets`, optional **`target_overrides`** (per-target blobs merged over adapter output). Must match `specs/schemas/scheme-v1.schema.json`.
 - `assets/` — wallpapers, user photo, icons, or other media referenced by the scheme file.
 
 **Discovery:** chromamancer (CLI / Nix helpers) loads **`schemes/<id>/scheme.json`** only—no alternate names or YAML in v1.

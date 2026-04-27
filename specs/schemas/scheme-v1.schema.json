@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://localhost/chromamancer/scheme-v1.schema.json",
   "title": "chromamancer scheme v1",
-  "description": "Portable desktop color + asset scheme. v1: Base16 names (base00–base0F), #RRGGBBAA colors, global fonts (ui + mono). Instance documents on disk are JSONC in schemes/*/scheme.json; this schema applies to the parsed JSON value.",
+  "description": "Portable color + font + asset scheme (JSONC on disk). v1: Base16 tokens, global font families, optional assets, optional target_overrides. Default Base16→target mapping lives in chromamancer adapters, not in this file.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -82,9 +82,9 @@
         "avatar": { "type": "string" }
       }
     },
-    "targets": {
+    "target_overrides": {
       "type": "object",
-      "description": "Per-target config (schema TBD while we decide bindings collaboratively).",
+      "description": "Optional per-target blobs merged over chromamancer’s built-in adapter output. Keys are target ids (e.g. hyprland, kitty). Shapes are adapter-defined; omit when defaults from Base16/fonts/assets suffice.",
       "additionalProperties": true
     }
   },

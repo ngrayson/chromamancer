@@ -4,7 +4,7 @@ Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kit
 
 ## Overview
 
-chromamancer is organized as a **Rust workspace** plus **Nix**, **machine-readable specs**, and **scheme packs**. The long-term goal: one canonical description of a look (colors + assets + target bindings), applied either **interactively** (CLI) or **declaratively** (Nix / Home Manager).
+chromamancer is organized as a **Rust workspace** plus **Nix**, **machine-readable specs**, and **scheme packs**. **Scheme data** (`scheme.json`) holds the portable look (Base16 colors, font families, assets). **Target adapters** in code map that data onto each app and hold any non-trivial logic; optional **`target_overrides`** in the scheme layer exceptions on top. Apply **interactively** (CLI) or **declaratively** (Nix / Home Manager) using the same scheme + adapters.
 
 ## Pillars
 
@@ -18,7 +18,7 @@ chromamancer is organized as a **Rust workspace** plus **Nix**, **machine-readab
 ```
 .
 ├── Cargo.toml              # workspace root
-├── crates/cli/             # CLI crate (package name / binary: chromamancer)
+├── crates/cli/             # CLI binary `chromamancer`; target adapters live here (e.g. `src/targets/`)
 ├── nix/
 │   ├── flake.nix
 │   └── modules/            # Home Manager / NixOS stubs
@@ -33,16 +33,19 @@ chromamancer is organized as a **Rust workspace** plus **Nix**, **machine-readab
 ## Data flow
 
 ```
-specs/schemas  ──validate──►  schemes/*     ──read──►  CLI apply
-                                   │                    │
-                                   └────────────────────┴──►  Nix modules / HM
+specs/schemas  ──validate──►  schemes/*/scheme.json
+                                      │
+              ┌───────────────────────┴────────────────────────┐
+              ▼                                                ▼
+    target adapters (Rust)                           Nix / HM modules
+    Base16+fonts+assets → per-app configs            same scheme + adapters
 ```
 
 ## Technology stack
 
 - **Rust** — CLI (`ratatui` placeholder UI, same baseline as Stellarium cli-tool template).
 - **Nix** — `nix develop` / future modules.
-- **JSON Schema** — draft 2020-12 for `specs/schemas/scheme-v1.schema.json` (Base16 + global fonts).
+- **JSON Schema** — draft 2020-12 for `specs/schemas/scheme-v1.schema.json` (scheme data); **target adapters** are code + tests, not the schema file.
 
 ## Key decisions
 
@@ -50,6 +53,7 @@ specs/schemas  ──validate──►  schemes/*     ──read──►  CLI a
 - **Spec before codegen** — Nix and Rust generators should target **versioned** schema files to avoid drift.
 - **v1 palette** — canonical keys are **Base16** (`base00`–`base0F`) with **`#RRGGBBAA`**, plus required **global fonts** (`fonts.ui`, `fonts.mono`).
 - **v1 scheme file** — `schemes/<id>/scheme.json` is **JSONC** on disk (comments allowed); validation runs on the parsed JSON value. Nix `fromJSON` needs strict JSON—use a build-time export or parser (see `specs/SPEC.md`).
+- **Target adapters** — default Base16→app mapping and transforms live in **chromamancer** (incremental rollout per target); optional **`target_overrides`** in scheme for exceptions.
 
 ## Future considerations
 

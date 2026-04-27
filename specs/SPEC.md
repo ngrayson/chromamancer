@@ -6,8 +6,8 @@ Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kit
 
 1. **Contracts live in** `specs/schemas/`. Version them (`scheme-v1`, later `scheme-v2`) before adding generators or Nix glue.
 2. **Schemes are data** under `schemes/<name>/`. They must validate against the active schema (tooling TBD).
-3. **Targets** map from the **Base16 core** (`base00`–`base0F`) and **global fonts** — no ad hoc color names in v1.
-4. **Iteration**: the Rust CLI under `crates/cli/` will eventually apply schemes quickly; **Nix / Home Manager** applies the same artifacts declaratively once a look is finalized.
+3. **`scheme.json` is portable look data** — Base16 `tokens`, `fonts`, `assets`. **Default mapping** from our names to each app’s config (and transforms like derived borders) lives in **target adapters** inside chromamancer; you add targets one adapter at a time.
+4. **Iteration**: the Rust CLI applies schemes via adapters; **Nix / Home Manager** uses the same scheme + adapter logic (shared or generated) declaratively once a look is finalized.
 
 ## Colors (v1): Base16 canonical names
 
@@ -36,7 +36,28 @@ Spec-driven desktop theming: live apply, Nix/HM, scheme packs, multi-target (Kit
 | `base0E` | magenta | secondary accent, keyword emphasis |
 | `base0F` | brown / deprecated | rare accents, legacy chrome |
 
-Generators **may** derive non-palette decoration (e.g. Hyprland border gradients, extra Kvantum SVG shades) from these sixteen values using documented formulas—those derivatives are **not** new canonical keys in v1.
+**Swapping themes:** replace the pack (or `tokens` / `fonts` / `assets` data). Adapters stay the same so the same look applies everywhere.
+
+## Target adapters (mapping + logic)
+
+**Not in `scheme.json` by default:** the rules that say “`base0D` → Hyprland `general:col.active_border`” (and any **logic**—blending alpha, rounding, template snippets) live in **chromamancer**, one **adapter per target** (Rust first; Nix can call the CLI, reuse shared tables, or embed parallel logic documented to stay in sync).
+
+- **Version adapters** with the tool (e.g. `hyprland_v1`) so old schemes keep working when mapping tables change.
+- **Add targets incrementally** — shipping a new adapter enables that target for **all** scheme packs without editing each pack.
+- **Optional `target_overrides`** in `scheme.json` — per-target JSON objects merged **on top of** adapter output when a particular palette needs an exception (rare); shape is defined per adapter over time.
+
+Default Base16 → Qt/Kvantum-style roles remains documented in the **Colors** table above; each adapter’s concrete key list will be spelled out in adapter-specific docs or tests as we implement.
+
+## Supported targets (adapter roadmap)
+
+| Target        | Role of adapter |
+|---------------|-----------------|
+| Kitty         | Map Base16 → terminal colors + `fonts.mono.family`; optional overrides |
+| GTK           | Palette / theme fragments from Base16 + `fonts.ui.family` |
+| Qt / Kvantum  | `QPalette` / Kvantum-related output + `fonts.ui.family` |
+| Quickshell    | Bar / lock theming from tokens + assets |
+| Albert        | QSS / theme from palette |
+| Hyprland      | `general:col.*`, decoration-related keys from mapping + logic |
 
 ## Fonts (v1): global `fonts`
 
@@ -54,18 +75,8 @@ Each `family` is a **Linux-usable font family string** (usually a Fontconfig fam
 - **Path:** `schemes/<scheme-id>/scheme.json` at the pack root (fixed filename; no nested-only layout in v1).
 - **Syntax:** **JSONC** — JSON plus line (`//`) and block (`/* … */`) comments. Plain **JSON** (no comments) is always valid.
 - **Semantics:** After parsing comments away, the document must validate against `specs/schemas/scheme-v1.schema.json` (structure is still “JSON” for schema tooling).
+- **Optional:** `target_overrides` — see **Target adapters** above.
 - **Nix note:** `builtins.fromJSON` / `readFile`+`fromJSON` only accept strict JSON. Nix-side pipelines should either consume a **generated JSON** artifact (e.g. `chromamancer dump-json`, a flake `runCommand` with a JSONC parser) or keep a machine-produced `scheme.json` without comments for import.
-
-## Targets (initial wish list)
-
-| Target        | Notes |
-|---------------|--------|
-| Kitty         | Base16 → terminal colors; `fonts.mono.family` (sizes in Kitty config / HM) |
-| GTK           | Map palette from Base16; `fonts.ui.family` where applicable |
-| Qt / Kvantum  | `QPalette` / Kvantum from Base16 + `fonts.ui.family` |
-| Quickshell    | bar + lock screen |
-| Albert        | theme / QSS from palette |
-| Hyprland      | `general:col.*`, decoration from Base16 mapping |
 
 ## Assets
 
@@ -77,6 +88,6 @@ Do **not** store secrets in scheme files. Treat schemes as **public** configurat
 
 ## See also
 
-- `specs/schemas/scheme-v1.schema.json` — v1 JSON Schema (Base16 + `#RRGGBBAA` + fonts); instance documents are **JSONC** on disk (`scheme.json`).
+- `specs/schemas/scheme-v1.schema.json` — v1 JSON Schema (Base16 + `#RRGGBBAA` + fonts + optional `target_overrides`); instance documents are **JSONC** on disk (`scheme.json`).
 - `schemes/README.md` — layout for scheme packs.
 - `ARCHITECTURE.md` — repository layout and data flow.
