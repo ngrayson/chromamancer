@@ -1,0 +1,30 @@
+{
+  // Example theme — copy to theme.jsonc and edit. Validate with theme-v1.schema.json (parse JSONC first).
+  "metadata": {
+    "schema_version": "1",
+    "name": "replace-with-pack-directory-name",
+    "version": "0.1.0"
+  },
+  "tokens": {
+    "base00": "#181825FF",
+    "base01": "#1e1e2eFF",
+    "base02": "#313244FF",
+    "base03": "#45475aFF",
+    "base04": "#585b70FF",
+    "base05": "#cdd6f4FF",
+    "base06": "#bac2deFF",
+    "base07": "#a6adc8FF",
+    "base08": "#f38ba8FF",
+    "base09": "#fab387FF",
+    "base0A": "#f9e2afFF",
+    "base0B": "#a6e3a1FF",
+    "base0C": "#94e2d5FF",
+    "base0D": "#89b4faFF",
+    "base0E": "#cba6f7FF",
+    "base0F": "#f5c2e7FF"
+  },
+  "fonts": {
+    "ui": { "family": "Inter" },
+    "mono": { "family": "JetBrainsMono Nerd Font" }
+  }
+}

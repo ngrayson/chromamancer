@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://localhost/chromamancer/scheme-v1.schema.json",
+  "$id": "https://localhost/chromamancer/theme-v1.schema.json",
   "title": "chromamancer theme v1",
-  "description": "Validates the JSON value inside themes/*/theme.jsonc (JSONC on disk). v1: Base16 tokens, fonts, optional assets, optional per-target targets{} (mappings, apply_quick, apply_nix, overrides, logic). Builtin Rust adapters supply defaults and imperative behavior; the theme file extends or replaces declaratively.",
+  "description": "Validates the JSON value inside theme.jsonc. v1: schema_version, Base16 tokens, fonts, optional assets, optional targets (registered target ids only).",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -10,17 +10,23 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "1",
+          "description": "Theme document format version; must match this schema major revision."
+        },
         "name": {
           "type": "string",
-          "description": "Theme id (often matches directory name under themes/)."
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Theme id (kebab-case). When the pack lives at themes/<name>/, MUST equal the directory name (see SPEC.md)."
         },
         "version": {
           "type": "string",
-          "description": "Theme pack revision (authoring), not the schema revision."
+          "description": "Theme pack authoring revision, not schema_version."
         },
         "author": { "type": "string" }
       },
-      "required": ["name"]
+      "required": ["schema_version", "name"]
     },
     "tokens": {
       "type": "object",
@@ -65,7 +71,6 @@
     },
     "fonts": {
       "type": "object",
-      "description": "Global font family names only (no sizes).",
       "additionalProperties": false,
       "properties": {
         "ui": { "$ref": "#/$defs/FontFamily" },
@@ -75,7 +80,6 @@
     },
     "assets": {
       "type": "object",
-      "description": "Paths relative to theme pack directory unless noted otherwise.",
       "additionalProperties": false,
       "properties": {
         "wallpaper": { "type": "string" },
@@ -84,33 +88,37 @@
     },
     "targets": {
       "type": "object",
-      "description": "Per-target mapping and apply-mode config. Keys = target ids (hyprland, kitty, …). See SPEC.md (Theme document / targets).",
+      "description": "Keys MUST be registered target ids (see SPEC.md / logic-registry.md). Bump schema when adding a target.",
+      "propertyNames": {
+        "enum": [
+          "hyprland",
+          "kitty",
+          "gtk",
+          "qt",
+          "kvantum",
+          "quickshell",
+          "albert"
+        ]
+      },
       "additionalProperties": {
         "type": "object",
         "additionalProperties": true,
         "properties": {
           "mappings": {
             "type": "object",
-            "description": "Declarative map from Base16 keys (or semantic slots) to this target’s config model—shape defined per adapter.",
             "additionalProperties": true
           },
           "apply_quick": {
             "type": "object",
-            "description": "Optional settings used only for apply-quick (e.g. paths, fragments). Omitted → adapter defaults.",
             "additionalProperties": true
           },
           "apply_nix": {
             "type": "object",
-            "description": "Optional settings used only for apply-nix (e.g. relative paths inside the Nix tree). Omitted → adapter defaults.",
             "additionalProperties": true
           },
-          "logic": {
-            "type": "string",
-            "description": "Optional builtin logic hook id (e.g. adapter-specific transforms). Format TBD per adapter."
-          },
+          "logic": { "type": "string" },
           "overrides": {
             "type": "object",
-            "description": "Deep-merged over the rendered config after mappings + builtin logic; same merge rules as SPEC.",
             "additionalProperties": true
           }
         }
@@ -121,8 +129,7 @@
   "$defs": {
     "RgbaHex": {
       "type": "string",
-      "pattern": "^#[0-9A-Fa-f]{8}$",
-      "description": "RGB + alpha, eight hex digits after #."
+      "pattern": "^#[0-9A-Fa-f]{8}$"
     },
     "FontFamily": {
       "type": "object",
@@ -131,8 +138,7 @@
       "properties": {
         "family": {
           "type": "string",
-          "minLength": 1,
-          "description": "Fontconfig-style family name."
+          "minLength": 1
         }
       }
     }

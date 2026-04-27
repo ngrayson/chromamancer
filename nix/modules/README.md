@@ -7,4 +7,4 @@ When we add first-party integration later, this directory would hold:
 - `home-manager.nix` — user-session wiring (generated fragments, optional options).
 - `nixos.nix` — optional system-level hooks.
 
-The parent `flake.nix` keeps commented placeholders for future `homeManagerModules` / `nixosModules` exports. Until then, **`devShells` only**.
+**Nix integration (deferred for first-party modules):** see **Reference Nix** in [`specs/SPEC.md`](../specs/SPEC.md). This repo does not ship HM/NixOS modules in the bootstrap phase.

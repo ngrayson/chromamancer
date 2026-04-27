@@ -8,7 +8,7 @@ chromamancer is a **Rust workspace**, **specs** + JSON Schema, **`themes/`** pac
 
 ## Pillars
 
-1. **Fast iteration — `chromamancer apply-quick`** writes **straight to live target paths** using `targets.<id>.apply_quick` when present; **`apply-nix`** writes into the **Nix config tree** using `apply_nix`; **`switch`** materializes (see `specs/SPEC.md`).
+1. **Fast iteration — `chromamancer apply-quick`** writes **straight to live target paths** using **`targets.<id>.apply_quick`** when present; **`apply-nix`** uses **`targets.<id>.apply_nix`** for layout under your Nix tree; **`switch`** materializes (see `specs/SPEC.md`).
 2. **Nix (optional)** — `nix/flake.nix` is **devShell** for now; users own integration. When Nix installs the same paths, **rebuild overwrites** CLI-written files there.
 3. **Schematic themes** — `specs/schemas/` validates **`theme.jsonc`**; `specs/SPEC.md` is the human index.
 4. **Theme packs** — directories under `themes/<id>/` with **`theme.jsonc`** (+ `assets/`).
@@ -24,7 +24,9 @@ chromamancer is a **Rust workspace**, **specs** + JSON Schema, **`themes/`** pac
 │   └── modules/            # deferred HM/NixOS
 ├── specs/
 │   ├── SPEC.md
+│   ├── logic-registry.md
 │   └── schemas/
+│       └── theme-v1.schema.json
 └── themes/
     ├── README.md
     └── _template/
@@ -33,7 +35,7 @@ chromamancer is a **Rust workspace**, **specs** + JSON Schema, **`themes/`** pac
 ## Data flow
 
 ```
-specs/schemas  ──validate──►  themes/*/theme.jsonc
+specs/schemas/theme-v1.schema.json  ──validate──►  themes/*/theme.jsonc
                                       │
               ┌───────────────────────┴────────────────────────┐
               ▼                                                ▼
@@ -45,11 +47,11 @@ specs/schemas  ──validate──►  themes/*/theme.jsonc
 
 - **Rust** — CLI and adapters.
 - **Nix** — dev shell; future packaging/modules.
-- **JSON Schema** — `specs/schemas/scheme-v1.schema.json`; **adapter behavior** is code + tests.
+- **JSON Schema** — [`specs/schemas/theme-v1.schema.json`](specs/schemas/theme-v1.schema.json); hooks in [`specs/logic-registry.md`](specs/logic-registry.md).
 
 ## Key decisions
 
-- **Theme file** — **`themes/<id>/theme.jsonc`** (JSONC); **`targets.<id>`** may include **`mappings`**, **`apply_quick`**, **`apply_nix`**, **`logic`**, **`overrides`** (optional pieces per target).
+- **Theme file** — **`themes/<id>/theme.jsonc`**; **`metadata.name`** = **`<id>`**; **`metadata.schema_version`** **`"1"`**.
 - **Workspace layout** — `crates/cli`; binary **`chromamancer`**.
 - **Spec before codegen** — version schemas before locking generators.
 - **v1 palette** — Base16 `base00`–`base0F`, **`#RRGGBBAA`**, required **`fonts.ui` / `fonts.mono`** (families only).
@@ -61,4 +63,4 @@ specs/schemas  ──validate──►  themes/*/theme.jsonc
 
 - Watch mode / reload helpers.
 - Tighter JSON Schemas per `targets.<id>`.
-- CI: `cargo test`, validate `themes/*`, flake checks.
+- CI: validate `themes/*`, **`metadata.name`** vs directory, `cargo test`, flake checks.

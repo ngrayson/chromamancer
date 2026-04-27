@@ -1,19 +1,27 @@
 # Theme packs
 
-Each **theme** is a directory **`themes/<theme-id>/`** (for example `themes/nord-forest/`).
+Each **theme** is **`themes/<theme-id>/`** (e.g. `themes/nord-forest/`). **`metadata.name`** in `theme.jsonc` **must equal** `<theme-id>`.
 
-## Layout (conventional)
+## Layout
 
-- **`theme.jsonc`** (required at pack root) — **JSONC**: palette (`tokens`), `fonts`, optional `assets`, optional **`targets`** (per-target `mappings`, optional `apply_quick` / `apply_nix`, optional `logic`, optional `overrides`). Must match `specs/schemas/scheme-v1.schema.json` after parsing.
-- **`assets/`** — wallpapers, avatars, media referenced from `theme.jsonc`.
+- **`theme.jsonc`** (required) — **JSONC**. Validate parsed JSON against [`specs/schemas/theme-v1.schema.json`](../specs/schemas/theme-v1.schema.json) (requires **`metadata.schema_version`: `"1"`**).
+- **`assets/`** — media referenced from `theme.jsonc` (paths usually relative to pack root).
+- **`_template/theme.example.jsonc`** — starting point; copy to **`theme.jsonc`** in a new pack.
 
-**Discovery (v1):** `chromamancer` loads **`themes/<id>/theme.jsonc`** only.
+## Discovery (normative)
+
+| Input | Resolution |
+|-------|--------------|
+| **`--theme <path>`** | Any `theme.jsonc`; pack root = its parent directory (for `assets`). |
+| **`--pack <id>`** | `themes/<id>/theme.jsonc` relative to **cwd** or **`CHROMAMANCER_THEMES_DIR`**. |
+
+Registered **`targets.*`** keys: [`specs/logic-registry.md`](../specs/logic-registry.md).
 
 ## Relationship to specs
 
-1. Bump **`specs/schemas/`** when token keys or `targets.*` shapes evolve.
-2. Validate packs in CI / CLI once tooling exists.
+1. Bump **`theme-v1.schema.json`** / **`metadata.schema_version`** when the format changes.
+2. CI should validate `themes/*/theme.jsonc` + assert **`metadata.name`** matches folder name.
 
 ## `_template`
 
-Placeholder for copying when starting a new pack—not an installable theme.
+Not an installable theme—copy to create a new pack.
