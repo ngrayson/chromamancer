@@ -1,35 +1,68 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://localhost/chromamancer/scheme-v1.schema.json",
-  "title": "chromamancer scheme (v1 draft)",
-  "description": "Draft contract for a portable desktop color/asset scheme. Fields will evolve; keep version in metadata.",
+  "title": "chromamancer scheme v1",
+  "description": "Portable desktop color + asset scheme. v1: fixed semantic token core; every color is #RRGGBBAA (alpha required, including opaque as FF).",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "properties": {
     "metadata": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
-        "name": { "type": "string" },
+        "name": {
+          "type": "string",
+          "description": "Display id for this scheme pack (often matches directory name under schemes/)."
+        },
         "version": {
           "type": "string",
-          "description": "Scheme format version (e.g. 1)"
+          "description": "Scheme pack revision (authoring), not the schema revision."
         },
         "author": { "type": "string" }
-      }
+      },
+      "required": ["name"]
     },
     "tokens": {
       "type": "object",
-      "description": "Canonical semantic colors (e.g. bg0, fg0, accent). Target mappings reference these keys.",
-      "additionalProperties": {
-        "type": "string",
-        "description": "Color as #RRGGBB or similar"
-      }
+      "description": "Fixed semantic palette. All keys required; values are #RRGGBBAA only.",
+      "additionalProperties": false,
+      "properties": {
+        "bg0": { "$ref": "#/$defs/RgbaHex" },
+        "bg1": { "$ref": "#/$defs/RgbaHex" },
+        "bg2": { "$ref": "#/$defs/RgbaHex" },
+        "fg0": { "$ref": "#/$defs/RgbaHex" },
+        "fg1": { "$ref": "#/$defs/RgbaHex" },
+        "fg_muted": { "$ref": "#/$defs/RgbaHex" },
+        "border": { "$ref": "#/$defs/RgbaHex" },
+        "accent": { "$ref": "#/$defs/RgbaHex" },
+        "accent_fg": { "$ref": "#/$defs/RgbaHex" },
+        "error": { "$ref": "#/$defs/RgbaHex" },
+        "warning": { "$ref": "#/$defs/RgbaHex" },
+        "success": { "$ref": "#/$defs/RgbaHex" },
+        "selection_bg": { "$ref": "#/$defs/RgbaHex" },
+        "selection_fg": { "$ref": "#/$defs/RgbaHex" }
+      },
+      "required": [
+        "bg0",
+        "bg1",
+        "bg2",
+        "fg0",
+        "fg1",
+        "fg_muted",
+        "border",
+        "accent",
+        "accent_fg",
+        "error",
+        "warning",
+        "success",
+        "selection_bg",
+        "selection_fg"
+      ]
     },
     "assets": {
       "type": "object",
-      "description": "Images and paths relative to the scheme directory or explicit URIs",
-      "additionalProperties": true,
+      "description": "Paths relative to scheme directory root unless noted otherwise.",
+      "additionalProperties": false,
       "properties": {
         "wallpaper": { "type": "string" },
         "avatar": { "type": "string" }
@@ -37,14 +70,16 @@
     },
     "targets": {
       "type": "object",
-      "description": "Optional per-target overrides or binding maps",
+      "description": "Per-target config (schema TBD while we decide bindings collaboratively).",
       "additionalProperties": true
     }
   },
+  "required": ["metadata", "tokens"],
   "$defs": {
-    "HexColor": {
+    "RgbaHex": {
       "type": "string",
-      "pattern": "^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$"
+      "pattern": "^#[0-9A-Fa-f]{8}$",
+      "description": "RGB + alpha, eight hex digits after #. Opaque colors use FF (e.g. #1a1b26FF)."
     }
   }
 }
