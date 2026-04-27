@@ -42,12 +42,12 @@ Generators **may** derive non-palette decoration (e.g. Hyprland border gradients
 
 The scheme carries **which typefaces** belong to the look, not **how big** they are—font sizes stay in Nix/Home Manager options, per-target configs (e.g. Kitty), or personal prefs so DPI and ergonomics do not fight the palette.
 
-Required:
+**v1 requires both slots:** `fonts.ui` and `fonts.mono` are always present in a valid scheme (JSON Schema enforces this). Qt/GTK-side generators use `ui`; terminal-style targets use `mono`. If you want one typeface everywhere, set both `family` strings to the same value.
 
 - **`fonts.ui.family`** — proportional UI face (GTK, Qt/Kvantum, shell UI text where applicable).
 - **`fonts.mono.family`** — monospace face (terminal, code-ish UI).
 
-Each is a **Linux-usable font family string** (usually a Fontconfig family name). If you truly use one face everywhere, the two `family` values may be identical—that is fine.
+Each `family` is a **Linux-usable font family string** (usually a Fontconfig family name).
 
 ## Targets (initial wish list)
 
