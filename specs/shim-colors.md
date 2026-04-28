@@ -66,6 +66,10 @@ See **[`hyprland-decorations.md`](hyprland-decorations.md)** and **`targets/hypr
 
 Default mapping uses **`chrome_focus`** (focused window border) and **`dark`** (unfocused). Optional keys use the `decoration.shadow.*` prefix for nested `decoration { shadow { … } }` (e.g. shadow **color**).
 
+## Qt platform palette (`palette.*`)
+
+For **qt5ct** / **qt6ct** and similar (not Kvantum). See **[`qt-apps.md`](qt-apps.md)** and **`targets/qt/mapping.jsonc`**.
+
 ## Literals on shims
 
 **`shim_assign`** values follow **`theme-v3`** schema: token name, `#RRGGBBAA`, `#RRGGBB`, or **`transparent`** where allowed (e.g. `selection_border`).

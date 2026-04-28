@@ -9,6 +9,7 @@ targets/
 ├── README.md
 ├── kitty/mapping.jsonc
 ├── hyprland/mapping.jsonc
+├── qt/mapping.jsonc
 ├── kvantum/mapping.jsonc
 ├── albert/mapping.jsonc
 └── …
@@ -17,7 +18,7 @@ targets/
 - **Theme v3** → validate as **`specs/schemas/target-mapping-v2.schema.json`** after JSONC parse (`shim_to_native`).
 - **Theme v2** → validate as **`specs/schemas/target-mapping-v1.schema.json`** (`canonical_to_native`).
 
-First-party **`kitty`**, **`hyprland`**, **`kvantum`**, **`albert`** files in this repo use **v2** (shims) and pair with **theme v3**.
+First-party **`kitty`**, **`hyprland`**, **`qt`**, **`kvantum`**, **`albert`** files in this repo use **v2** (shims) and pair with **theme v3**.
 
 ## `CHROMAMANCER_TARGETS_DIR`
 
@@ -54,3 +55,13 @@ Implementations resolve **`targets/<target_id>/mapping.jsonc`** relative to that
 1. Register id in **`target-mapping-v1.schema.json`** and **`target-mapping-v2.schema.json`**, [`logic-registry.md`](../specs/logic-registry.md), SPEC roadmap.
 2. For **v3:** add shims to [`specs/shim-colors.md`](../specs/shim-colors.md) + **`theme-v3.schema.json`** enum as needed. For **v2:** add canonical keys to [`specs/canonical-colors.md`](../specs/canonical-colors.md) + **`theme-v2.schema.json`** enum.
 3. Add **`targets/<id>/mapping.jsonc`** (v1 and/or v2 as appropriate).
+
+## Targets in this repo
+
+| `target_id` | Role |
+|-------------|------|
+| `kitty` | Terminal colors |
+| `hyprland` | Window border / decoration colors |
+| `qt` | Qt platform palette (`palette.*` logical keys — [`specs/qt-apps.md`](../specs/qt-apps.md)) |
+| `kvantum` | Kvantum `GeneralColors` |
+| `albert` | Widgets Box Model INI |

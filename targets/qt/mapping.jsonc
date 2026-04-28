@@ -1,0 +1,32 @@
+{
+  // Qt platform palette (qt5ct / qt6ct / kdeglobals — adapters TBD). Logical QPalette roles: specs/qt-apps.md
+  "metadata": {
+    "schema_version": "2",
+    "target_id": "qt",
+    "comment": "shim_to_native values are palette.* ids, not file paths yet"
+  },
+  "shim_to_native": {
+    "window": "palette.window",
+    "base": "palette.base",
+    "alt_base": "palette.alternate_base",
+    "button": "palette.button",
+    "light": "palette.light",
+    "mid_light": "palette.midlight",
+    "dark": "palette.dark",
+    "mid": "palette.mid",
+    "chrome_focus": "palette.highlight",
+    "chrome_focus_muted": "palette.secondary_highlight",
+    "text": "palette.text",
+    "window_text": "palette.window_text",
+    "button_text": "palette.button_text",
+    "inactive_text": "palette.muted_text",
+    "disabled_text": "palette.shadow",
+    "tooltip_base": "palette.tool_tip_base",
+    "tooltip_text": "palette.tool_tip_text",
+    "chrome_focus_text": "palette.highlighted_text",
+    "link": "palette.link",
+    "link_visited": "palette.link_visited",
+    "placeholder_text": "palette.placeholder_text",
+    "list_selection": "palette.accent"
+  }
+}
