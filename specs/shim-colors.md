@@ -60,6 +60,12 @@ v2 **`canonical_assign`** (`terminal.*`, `qt.kvantum.*`, …) is **legacy**; v3 
 | `list_selection_subtext` | Secondary line on the **selected** row |
 | `selection_border` | Border around selection; value may be **`transparent`** |
 
+## Hyprland (window border / decoration colors)
+
+See **[`hyprland-decorations.md`](hyprland-decorations.md)** and **`targets/hyprland/mapping.jsonc`**.
+
+Default mapping uses **`chrome_focus`** (focused window border) and **`dark`** (unfocused). Optional keys use the `decoration.shadow.*` prefix for nested `decoration { shadow { … } }` (e.g. shadow **color**).
+
 ## Literals on shims
 
 **`shim_assign`** values follow **`theme-v3`** schema: token name, `#RRGGBBAA`, `#RRGGBB`, or **`transparent`** where allowed (e.g. `selection_border`).

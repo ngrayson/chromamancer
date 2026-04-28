@@ -8,6 +8,7 @@ Per-app projection from theme semantics → native config keys. The file **`meta
 targets/
 ├── README.md
 ├── kitty/mapping.jsonc
+├── hyprland/mapping.jsonc
 ├── kvantum/mapping.jsonc
 ├── albert/mapping.jsonc
 └── …
@@ -16,7 +17,7 @@ targets/
 - **Theme v3** → validate as **`specs/schemas/target-mapping-v2.schema.json`** after JSONC parse (`shim_to_native`).
 - **Theme v2** → validate as **`specs/schemas/target-mapping-v1.schema.json`** (`canonical_to_native`).
 
-First-party **`kitty`**, **`kvantum`**, **`albert`** files in this repo use **v2** (shims) and pair with **theme v3**.
+First-party **`kitty`**, **`hyprland`**, **`kvantum`**, **`albert`** files in this repo use **v2** (shims) and pair with **theme v3**.
 
 ## `CHROMAMANCER_TARGETS_DIR`
 

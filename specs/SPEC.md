@@ -198,6 +198,7 @@ Reproducible themes: **pack-relative assets**; pin **chromamancer** version.
 - [`specs/schemas/target-mapping-v1.schema.json`](schemas/target-mapping-v1.schema.json)
 - [`specs/schemas/target-mapping-v2.schema.json`](schemas/target-mapping-v2.schema.json)
 - [`specs/shim-colors.md`](shim-colors.md)
+- [`specs/hyprland-decorations.md`](hyprland-decorations.md)
 - [`specs/canonical-colors.md`](canonical-colors.md)
 - [`targets/README.md`](../targets/README.md)
 - [`specs/logic-registry.md`](logic-registry.md)

@@ -1,0 +1,12 @@
+{
+  // Hyprland: window border colors (+ optional nested decoration.shadow.*)
+  "metadata": {
+    "schema_version": "2",
+    "target_id": "hyprland",
+    "comment": "Native values: keys inside general { } (col.*) or decoration.shadow.* — see specs/hyprland-decorations.md"
+  },
+  "shim_to_native": {
+    "chrome_focus": "col.active_border",
+    "dark": "col.inactive_border"
+  }
+}

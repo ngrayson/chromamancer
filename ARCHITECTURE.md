@@ -43,6 +43,7 @@ chromamancer is a **Rust workspace**, **specs** + JSON Schema, **`themes/`** pac
 ├── targets/
 │   ├── README.md
 │   ├── kitty/mapping.jsonc
+│   ├── hyprland/mapping.jsonc
 │   ├── kvantum/mapping.jsonc
 │   └── albert/mapping.jsonc
 └── themes/
