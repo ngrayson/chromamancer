@@ -60,8 +60,8 @@ Implementations resolve **`targets/<target_id>/mapping.jsonc`** relative to that
 
 | `target_id` | Role |
 |-------------|------|
-| `kitty` | Terminal colors |
-| `hyprland` | Window border / decoration colors |
-| `qt` | Qt platform palette (`palette.*` logical keys — [`specs/qt-apps.md`](../specs/qt-apps.md)) |
-| `kvantum` | Kvantum `GeneralColors` |
-| `albert` | Widgets Box Model INI |
+| `kitty` | Terminal colors | [kitty/README.md](kitty/README.md) |
+| `hyprland` | Window border / decoration colors | [hyprland/README.md](hyprland/README.md) |
+| `qt` | Qt platform palette (`palette.*` logical keys — [`specs/qt-apps.md`](../specs/qt-apps.md)) | — |
+| `kvantum` | Kvantum `GeneralColors` | — |
+| `albert` | Widgets Box Model INI | [albert/README.md](albert/README.md) |
