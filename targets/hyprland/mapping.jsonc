@@ -7,6 +7,6 @@
   },
   "shim_to_native": {
     "chrome_focus": "col.active_border",
-    "dark": "col.inactive_border"
+    "mid": "col.inactive_border"
   }
 }
