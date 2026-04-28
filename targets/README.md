@@ -7,10 +7,13 @@ Per-app projection from theme semantics → native config keys. The file **`meta
 ```
 targets/
 ├── README.md
+├── kitty/README.md
 ├── kitty/mapping.jsonc
+├── hyprland/README.md
 ├── hyprland/mapping.jsonc
 ├── qt/mapping.jsonc
 ├── kvantum/mapping.jsonc
+├── albert/README.md
 ├── albert/mapping.jsonc
 └── …
 ```
@@ -58,8 +61,8 @@ Implementations resolve **`targets/<target_id>/mapping.jsonc`** relative to that
 
 ## Targets in this repo
 
-| `target_id` | Role |
-|-------------|------|
+| `target_id` | Role | Field notes |
+|-------------|------|-------------|
 | `kitty` | Terminal colors | [kitty/README.md](kitty/README.md) |
 | `hyprland` | Window border / decoration colors | [hyprland/README.md](hyprland/README.md) |
 | `qt` | Qt platform palette (`palette.*` logical keys — [`specs/qt-apps.md`](../specs/qt-apps.md)) | — |
