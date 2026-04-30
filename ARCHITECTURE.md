@@ -1,6 +1,6 @@
 # Architecture — chromamancer
 
-Spec-driven desktop theming: live apply, Nix/HM, theme packs, multi-target (Kitty, GTK, Qt, Quickshell, Albert, Hyprland)
+Spec-driven desktop theming: live apply, Nix/HM, theme packs, multi-target (Kitty, GTK, Qt, Quickshell, Albert, Hyprland, Firefox)
 
 ## Overview
 

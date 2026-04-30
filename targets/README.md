@@ -11,6 +11,7 @@ targets/
 ├── kitty/mapping.jsonc
 ├── hyprland/README.md
 ├── hyprland/mapping.jsonc
+├── firefox/README.md
 ├── qt/mapping.jsonc
 ├── kvantum/mapping.jsonc
 ├── albert/README.md
@@ -68,3 +69,4 @@ Implementations resolve **`targets/<target_id>/mapping.jsonc`** relative to that
 | `qt` | Qt platform palette (`palette.*` logical keys — [`specs/qt-apps.md`](../specs/qt-apps.md)) | — |
 | `kvantum` | Kvantum `GeneralColors` | — |
 | `albert` | Widgets Box Model INI | [albert/README.md](albert/README.md) |
+| `firefox` | Gecko `userChrome` / profile theming (Wayland + Proton); **doc + contract only** — no `mapping.jsonc` yet | [firefox/README.md](firefox/README.md) |

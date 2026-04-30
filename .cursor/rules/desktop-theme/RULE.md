@@ -5,7 +5,7 @@ alwaysApply: true
 
 ## chromamancer (desktop-theme)
 
-This project is a **spec-driven** theming suite for Linux desktops (Hyprland, Kitty, GTK/Qt, Quickshell, Albert, etc.).
+This project is a **spec-driven** theming suite for Linux desktops (Hyprland, Kitty, GTK/Qt, Quickshell, Albert, Firefox, etc.).
 
 ### Priorities
 

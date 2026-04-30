@@ -167,6 +167,7 @@ Reproducible themes: **pack-relative assets**; pin **chromamancer** version.
 | Kvantum    | Planned  | often rebuild-only |
 | Quickshell | Planned  | TBD |
 | Albert     | Partial  | mapping v1 + manual INI |
+| Firefox    | Documented | Nix/HM `userChrome` + Stylix GTK; CLI adapter / `mapping.jsonc` TBD — [`targets/firefox/README.md`](../targets/firefox/README.md) |
 
 ## Fonts
 
@@ -202,6 +203,7 @@ Reproducible themes: **pack-relative assets**; pin **chromamancer** version.
 - [`specs/qt-apps.md`](qt-apps.md)
 - [`specs/canonical-colors.md`](canonical-colors.md)
 - [`targets/README.md`](../targets/README.md)
+- [`targets/firefox/README.md`](../targets/firefox/README.md)
 - [`specs/logic-registry.md`](logic-registry.md)
 - [`themes/README.md`](../themes/README.md)
 - [`ARCHITECTURE.md`](../ARCHITECTURE.md)
